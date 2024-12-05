@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# VS code settings
+.vscode/
+
+#No plots and nc tracking
+*.nc
+*.png
+*.mp4
