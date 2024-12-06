@@ -3,7 +3,7 @@ Welcome to OSCARplus python module software repository, used for processing of O
 ## 1. Installation
 ### 1.1 Download
 1. Download the latest release from the "Releases" section on the right side of the project page and unzip it.
-2. In a directory where administrative privileges are not required, create a folder structure as follows:
+2. In your home directory, create a folder structure as follows:
    ```
    oscarplus_modules/oscarplus/
    ```
@@ -18,7 +18,7 @@ oscarplus_modules/
 └── seastar/
 ```
 ### 1.2 Create a Python Environment
-To install the required Python packages, you can use `conda`. In anaconda prompt run (replace /PATH/TO/ with the actual path to your oscarplus_modules directory):
+To install the required Python packages, you can use `conda`. In anaconda prompt run (replace /PATH/TO/ with the path to your oscarplus_modules directory):
 ```
 conda env create -f /PATH/TO/oscarplus_modules/oscarplus/environment.yaml
 conda activate oscarplus
