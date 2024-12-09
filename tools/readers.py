@@ -24,6 +24,41 @@ import numpy as np
 import seastar as ss
 
 
+def load_data_dirs():
+    """
+    Load the directories containing the OSCAR data
+
+    Returns
+    -------
+    data_dirs : ``dict``
+        Dictionary containing the directories containing the OSCAR data
+    """
+    data_dirs = {}
+    data_dir_file_loc = os.path.dirname(os.path.dirname(__file__))
+    with open(os.path.join(data_dir_file_loc, "data_dir.txt"), "r") as file:
+        for line in file:
+            line = line.strip()
+            if not line.startswith("#") and line:  # Skip commented or empty lines
+                line = line.split(":")
+                if line[1].startswith(r"/PATH/TO"):
+                    data_dirs[line[0]] = None
+                else:
+                    data_dirs[line[0]] = line[1]
+
+    # Assert that all keys and entries are valid
+    for key in data_dirs.keys():
+        assert not key.startswith("#"), f"Entry '{key}' in data_dirs starts with '#'"
+        if isinstance(data_dirs[key], str):
+            assert not data_dirs[key].startswith(
+                r"/PATH/TO"
+            ), f"Entry '{data_dirs[key]}' in data_dirs starts with '/PATH/TO'"
+        else:
+            assert (
+                data_dirs[key] is None
+            ), f"Entry '{data_dirs[key]}' in data_dirs is not a string or None"
+    return data_dirs
+
+
 def get_data_dir():
     """
     Find the directory containing the OSCAR data
