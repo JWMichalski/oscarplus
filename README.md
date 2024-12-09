@@ -1,3 +1,4 @@
+#OSCARplus
 Welcome to OSCARplus python module software repository, used for processing of Ocean Surface Current Airborne Radar demonstrator (OSCAR) data, along with Model for Applications at Regional Scale (MARS2D/3D) and bathymetry.
 
 ## 1. Installation
@@ -7,10 +8,11 @@ Welcome to OSCARplus python module software repository, used for processing of O
    ```
    oscarplus_modules/oscarplus/
    ```
-3. Move the content of the unzipped `/oscarplus-v[RELEASE VERSION]/` folder into the `oscarplus_modules/oscarplus/` folder.
+3. Move the contents of `/oscarplus-v[RELEASE VERSION].zip/oscarplus-v[RELEASE VERSION]/` folder into the `oscarplus_modules/oscarplus/` folder.
 4. This library depends on the Seastar Project library available here: [Seastar Project library](https://github.com/ACHMartin/seastar_project).
-   - Download the `v2023.10.3` release and unzip it.
-   - Move the folder /seastar_project-2023.10.3/seastar/ to /oscarplus_modules/.
+   - Download the `v2023.10.3` release.
+   - Move the folder /seastar_project-2023.10.3.zip/seastar_project-2023.10.3/seastar/ to /oscarplus_modules/.
+
 After following these steps your directory structure should look like this:
 ```
 oscarplus_modules/
