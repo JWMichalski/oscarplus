@@ -8,10 +8,8 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - given-names: Jakub
+  - given-names: Jakub W.
     family-names: Michalski
-    email: jmichalski3009@gmail.com
-    affiliation: National Oceanography Centre
     orcid: 'https://orcid.org/0009-0005-2356-0478'
 repository-code: 'https://github.com/JWMichalski/oscarplus'
 license: MIT

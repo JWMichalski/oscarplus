@@ -33,7 +33,6 @@ dependencies:
   - click=8.1.7=win_pyh7428d3b_0
   - cloudpickle=2.2.1=py311haa95532_0
   - colorama=0.4.6=py311haa95532_0
-  - comm=0.1.2=py311haa95532_0
   - contourpy=1.0.5=py311h59b6b97_0
   - cycler=0.11.0=pyhd3eb1b0_0
   - cytoolz=0.12.0=py311h2bbff1b_0
@@ -191,4 +190,10 @@ dependencies:
   - zipp=3.11.0=py311haa95532_0
   - zlib=1.2.13=hcfcfb64_5
   - zstd=1.5.5=hd43e919_0
-prefix: N:\Anaconda3\envs\seastar
+  - pip:
+      - comm==0.2.2
+      - ipympl==0.9.4
+      - ipython-genutils==0.2.0
+      - ipywidgets==8.1.5
+      - jupyterlab-widgets==3.0.13
+      - widgetsnbextension==4.0.13
