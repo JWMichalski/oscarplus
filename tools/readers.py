@@ -38,10 +38,12 @@ def __load_data_dirs():
             line = line.strip()
             if not line.startswith("#") and line:  # Skip commented or empty lines
                 line = line.split(":")
-                if line[1].startswith(r"/PATH/TO"):
+                path = ":".join(line[1:])  # In case the path contains ':'
+
+                if path.startswith(r"/PATH/TO"):
                     __data_dirs[line[0]] = None
                 else:
-                    __data_dirs[line[0]] = line[1]
+                    __data_dirs[line[0]] = path
 
     # Assert that all keys and entries are valid
     for key in __data_dirs.keys():
