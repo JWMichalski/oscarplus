@@ -41,7 +41,7 @@ def __load_data_dirs():
                 if line[1].startswith(r"/PATH/TO"):
                     __data_dirs[line[0]] = None
                 else:
-                    __data_dirs[line[0]] = line[1]
+                    __data_dirs[line[0]] = f"{line[1]}:{line[2]}"
 
     # Assert that all keys and entries are valid
     for key in __data_dirs.keys():
