@@ -6,8 +6,8 @@ This module contains the functions that read the data from the files.
 
 Functions
 ---------
-get_OSCAR_data_dirs : ``string``
-    Find the directory containing the OSCAR data
+get_data_dirs : ``dict``
+    Find the directories containing the data
 read_OSCAR : ``xarray.Dataset, string``
     Read the OSCAR data from the given directory
 get_wind_data : ``float, float``
@@ -24,16 +24,14 @@ import numpy as np
 import seastar as ss
 
 
-def load_data_dirs():
+__data_dirs = {}
+
+
+def __load_data_dirs():
     """
     Load the directories containing the OSCAR data
-
-    Returns
-    -------
-    data_dirs : ``dict``
-        Dictionary containing the directories containing the OSCAR data
     """
-    data_dirs = {}
+    global __data_dirs
     data_dir_file_loc = os.path.dirname(os.path.dirname(__file__))
     with open(os.path.join(data_dir_file_loc, "data_dir.txt"), "r") as file:
         for line in file:
@@ -41,41 +39,44 @@ def load_data_dirs():
             if not line.startswith("#") and line:  # Skip commented or empty lines
                 line = line.split(":")
                 if line[1].startswith(r"/PATH/TO"):
-                    data_dirs[line[0]] = None
+                    __data_dirs[line[0]] = None
                 else:
-                    data_dirs[line[0]] = line[1]
+                    __data_dirs[line[0]] = line[1]
 
     # Assert that all keys and entries are valid
-    for key in data_dirs.keys():
+    for key in __data_dirs.keys():
         assert not key.startswith("#"), f"Entry '{key}' in data_dirs starts with '#'"
-        if isinstance(data_dirs[key], str):
-            assert not data_dirs[key].startswith(
+        if isinstance(__data_dirs[key], str):
+            assert not __data_dirs[key].startswith(
                 r"/PATH/TO"
-            ), f"Entry '{data_dirs[key]}' in data_dirs starts with '/PATH/TO'"
+            ), f"Entry '{__data_dirs[key]}' in data_dirs starts with '/PATH/TO'"
         else:
             assert (
-                data_dirs[key] is None
-            ), f"Entry '{data_dirs[key]}' in data_dirs is not a string or None"
-    return data_dirs
+                __data_dirs[key] is None
+            ), f"Entry '{__data_dirs[key]}' in data_dirs is not a string or None"
 
 
-def get_data_dir():
+def get_data_dirs():
     """
-    Find the directory containing the OSCAR data
+    Find the directories containing the data
 
     Returns
     -------
-    data_directory : ``string``
-        The directory containing the OSCAR data
+    __data_dirs : ``dict``
+        Dictionary containing the directories containing the data
     """
-    data_dir_file_loc = os.path.dirname(os.path.dirname(__file__))
-    with open(os.path.join(data_dir_file_loc, "data_dir.txt"), "r") as file:
-        data_directory = file.read().strip()
-    return data_directory
+    return __data_dirs
 
 
 def read_OSCAR(
-    date, track, gmf, level, resolution="200x200m", data_dir=None, warn=True, **kwargs
+    date,
+    track,
+    gmf,
+    level,
+    resolution="200x200m",
+    OSCAR_data_dir=None,
+    warn=True,
+    **kwargs,
 ):
     """
     Read the OSCAR data from the given directory
@@ -96,9 +97,9 @@ def read_OSCAR(
     resolution : ``string``, optional
         Resolution of the OSCAR data
         Default is '200x200m'
-    data_dir : ``string``, optional
+    OSCAR_data_dir : ``string``, optional
         Path to the directory containing the OSCAR data
-        If none is given, the data directory is found using get_OSCAR_data_dirs
+        If none is given, the data directory is selected from data_dir.txt
     warn : ``bool``, optional
         Whether to warn if attributes are not found
     **kwargs : ``dict``
@@ -110,25 +111,25 @@ def read_OSCAR(
     DS_path : ``string``
         Path to the file containing the OSCAR data
     """
-    if data_dir is None:
-        data_dir = get_data_dir()
+    if OSCAR_data_dir is None:
+        OSCAR_data_dir = __data_dirs["OSCAR"]
 
     match level:
         case "L1b":
             window = f"{kwargs['window']}" if "window" in kwargs else "3"
-            DS_path = os.path.join(data_dir, "Iroise Sea L1b", f"window{window}")
+            DS_path = os.path.join(OSCAR_data_dir, "Iroise Sea L1b", f"window{window}")
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(DS_path, f"{date}_Track_{track}_OSCAR_L1b.nc")
             )
             resolution = f"window{window}"
         case "L1c":
-            DS_path = os.path.join(data_dir, f"Iroise Sea {resolution} L1c")
+            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L1c")
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(DS_path, f"{date}_Track_{track}_OSCAR_{resolution}_L1c.nc")
             )
         case "L2 lmout":
             DS_path = os.path.join(
-                data_dir,
+                OSCAR_data_dir,
                 f"Iroise Sea {resolution} L2 lmout",
             )
             DS = ss.utils.readers.readNetCDFFile(
@@ -139,7 +140,7 @@ def read_OSCAR(
             )
         case "L2":
             DS_path = os.path.join(
-                data_dir, f"Iroise Sea {resolution} L2", "windcurrent"
+                OSCAR_data_dir, f"Iroise Sea {resolution} L2", "windcurrent"
             )
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(
@@ -148,12 +149,12 @@ def read_OSCAR(
                 )
             )
         case "L2 MF":
-            DS_path = os.path.join(data_dir, f"Iroise Sea {resolution} L2 MF")
+            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L2 MF")
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(DS_path, f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc")
             )
         case "L2a MF":
-            DS_path = os.path.join(data_dir, f"Iroise Sea {resolution} L2a MF")
+            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L2a MF")
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(DS_path, f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc")
             )
@@ -260,3 +261,6 @@ def read_MARS(model_path, resolution):
     MARS["CurrentV"] = (("time", "CrossRange", "GroundRange"), current_V)
     MARS.attrs["Resolution"] = f"{resolution}x{resolution}m"
     return MARS
+
+
+__load_data_dirs()
