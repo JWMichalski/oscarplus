@@ -44,7 +44,8 @@ def __load_data_dirs():
                     __data_dirs[line[0]] = None
                 else:
                     __data_dirs[line[0]] = path
-
+    file.close()
+    
     # Assert that all keys and entries are valid
     for key in __data_dirs.keys():
         assert not key.startswith("#"), f"Entry '{key}' in data_dirs starts with '#'"
