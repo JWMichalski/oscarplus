@@ -30,8 +30,9 @@ To ensure the code can recognize the modules, add them to your Python path. Run 
 ```
 conda develop /PATH/TO/oscarplus_modules/
 ```
-### 1.4 Add datapaths
-The recommended method for providing data to this module is by specifying paths in a data_dir.txt file. Alternatively, you can directly pass paths as arguments when calling functions.
+### 1.4 Add datapaths (optional)
+The recommended method for providing data to this module is by specifying paths in a data_dir.txt file.
+Alternatively, you can directly pass paths as arguments when calling reader functions.
 #### Using data_dir.txt
 1. Open the data_dir.txt file.
 2. Replace the placeholder /PATH/TO/xxx with the actual paths to your data directories.
@@ -60,16 +61,18 @@ Inside each directory, the module expects data files following naming scheme:
 Where:
 ```YYYYMMDD``` represents the date,
 ```AA``` represents the track number,
-```RRR``` represents the resolution, skip for L1a and L1b,
-```GMF``` represents the geophysical model function used for L1c to L2 lmout processing (only for L2 lmout and higher processing levels),
-```STATE``` represents the state of the data (L1a/b/c for levels L1a/b/c, lmout for L2 lmout, L2 for L2 and MF for higher).
+```RRR``` represents the resolution, skip for L1b,
+```GMF``` represents the geophysical model function used for L1c to L2 lmout processing, skip for L1b and L1c,
+```STATE``` represents the state of the data (L1b/c for levels L1b/c, lmout for L2 lmout, L2 for L2 and MF for higher).
 #### Recognized Processing Levels
 The following processing levels are supported:
-- L1a/L1b/L1c: Data before the inversion
+- L1b/L1c: Data before the inversion
 - L2 lmout: Data containing ambiguities
 - L2: Data with ambiguities removed
 - L2 MF: L2 data processed with median filtering
 - L2a MF: L2 MF data augmented with derivative products (e.g., curl, divergence, etc.)
+
+Kernel restart is required to recognize the changes.
 ## 3. License
 Copyright 2024 Jakub Michalski
 
