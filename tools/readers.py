@@ -83,9 +83,6 @@ def read_OSCAR(
     """
     Read the OSCAR data from the given directory
 
-    For L2 AR data, the weight can be specified as a keyword argument
-    Otherwise, the file with weight 0 is discarded,
-    if multiple files are left, an error is raised
     Parameters
     ----------
     date : ``string``
@@ -142,12 +139,12 @@ def read_OSCAR(
             )
         case "L2":
             DS_path = os.path.join(
-                OSCAR_data_dir, f"Iroise Sea {resolution} L2", "windcurrent"
+                OSCAR_data_dir, f"Iroise Sea {resolution} L2"
             )
             DS = ss.utils.readers.readNetCDFFile(
                 os.path.join(
                     DS_path,
-                    f"{date}_Track_{track}_{resolution}_{gmf}_pass_2.nc",
+                    f"{date}_Track_{track}_{resolution}_{gmf}_L2.nc",
                 )
             )
         case "L2 MF":

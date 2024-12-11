@@ -42,12 +42,13 @@ The directory containing OSCAR data must have subdirectories named according to 
 ```Iroise Sea RRRxRRRm LEVEL```
 
 Here:
-```RRR``` represents the resolution of the data in meters (e.g., 200),
+```RRR``` represents the resolution of the data in meters (e.g., 200). Skip for L1a and L1b,
 ```LEVEL``` indicates the processing level (described below).
 
 An example directory structure might look like this:
 ```
 OSCAR/
+├── Iroise Sea L1b/
 ├── Iroise Sea 200x200m L1c/
 ├── Iroise Sea 200x200m L2/
 ├── Iroise Sea 200x200m L2 lmout/
@@ -59,12 +60,12 @@ Inside each directory, the module expects data files following naming scheme:
 Where:
 ```YYYYMMDD``` represents the date,
 ```AA``` represents the track number,
-```RRR``` represents the resolution,
+```RRR``` represents the resolution, skip for L1a and L1b,
 ```GMF``` represents the geophysical model function used for L1c to L2 lmout processing (only for L2 lmout and higher processing levels),
-```STATE``` represents the state of the data (L1c for level L1c, lmout for L2 lmout, pass_2 for L2 and MF for higher).
+```STATE``` represents the state of the data (L1a/b/c for levels L1a/b/c, lmout for L2 lmout, L2 for L2 and MF for higher).
 #### Recognized Processing Levels
 The following processing levels are supported:
-- L1c: Data before inversion
+- L1a/L1b/L1c: Data before the inversion
 - L2 lmout: Data containing ambiguities
 - L2: Data with ambiguities removed
 - L2 MF: L2 data processed with median filtering
