@@ -1,7 +1,8 @@
-##############################################################
-#### This folder provides paths to different data sources ####
-# You do not need to provide paths to data you will not need #
-##############################################################
+######################################################################
+######## This folder provides paths to different data sources ########
+##### At a minimum, include the directory containing OSCAR data ######
+# Paths to other datasets are optional but can be added if available #
+######################################################################
 
 OSCAR:/PATH/TO/folder_with_OSCAR
 MARS2D:/PATH/TO/folder_with_MARS2D
