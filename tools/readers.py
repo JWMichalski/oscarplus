@@ -253,39 +253,46 @@ def get_wind_data(date, track, csv_path):
     return wind_direction, wind_velocity
 
 
-def read_MARS(model_path, resolution):
+def read_MARS2D(filename, resolution, file_path=None):
     """
-    Read the MARS model data from the given directory
+    Read the MARS2D model data from the given directory
     Renames the variables to match the OSCAR data
     Adds resolution attribute
 
     Parameters
     ----------
-    model_path : ``string``
-        Path to the directory containing the MARS model data
+    filename : ``string``
+        Name of the file containing the MARS model data
     resolution : ``string``
         Resolution of the MARS data (in meters)
+    file_path : ``string``, optional
+        Path to the file containing the MARS model data
+        If none is given, the data directory is selected from data_dir.txt
     Returns
     -------
-    MARS : ``xarray.Dataset``
-        Dataset containing the MARS model data
+    MARS2D : ``xarray.Dataset``
+        Dataset containing the MARS2D model data with the renamed variables
     """
-    MARS = xr.open_mfdataset(model_path)  # change path to select a different file
+    if file_path is None:
+        file_path = os.path.join(__data_dirs["MARS2D"], filename)
+    else:
+        file_path = os.path.join(file_path, filename)
+
+    MARS2D = xr.open_mfdataset(file_path)  # change path to select a different file
     # add current velocity and direction
     cvel, cdir = ss.utils.tools.currentUV2VelDir(
-        MARS["U"].values, MARS["V"].values
+        MARS2D["U"].values, MARS2D["V"].values
     )  # converts u and v components to velocity and direction
-    MARS["CurrentVelocity"] = (("time", "nj", "ni"), cvel)
-    MARS["CurrentDirection"] = (("time", "nj", "ni"), cdir)
-    # DS=DS.isel(ni=slice(0, 100)) #selects a region of interest
-    MARS = MARS.rename({"ni": "GroundRange", "nj": "CrossRange"})
+    MARS2D["CurrentVelocity"] = (("time", "nj", "ni"), cvel)
+    MARS2D["CurrentDirection"] = (("time", "nj", "ni"), cdir)
+    MARS2D = MARS2D.rename({"ni": "GroundRange", "nj": "CrossRange"})
     current_U, current_V = ss.utils.tools.currentVelDir2UV(
-        MARS["CurrentVelocity"].values, MARS["CurrentDirection"].values
+        MARS2D["CurrentVelocity"].values, MARS2D["CurrentDirection"].values
     )  # converts velocity and direction to u and v components
-    MARS["CurrentU"] = (("time", "CrossRange", "GroundRange"), current_U)
-    MARS["CurrentV"] = (("time", "CrossRange", "GroundRange"), current_V)
-    MARS.attrs["Resolution"] = f"{resolution}x{resolution}m"
-    return MARS
+    MARS2D["CurrentU"] = (("time", "CrossRange", "GroundRange"), current_U)
+    MARS2D["CurrentV"] = (("time", "CrossRange", "GroundRange"), current_V)
+    MARS2D.attrs["Resolution"] = f"{resolution}x{resolution}m"
+    return MARS2D
 
 
 __load_data_dirs()
