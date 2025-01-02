@@ -55,7 +55,7 @@ def cost(L2_sel, L2_neighbours, **cost_function_kwargs):
 @pytest.mark.parametrize("i_x, i_y", [(0, 0), (3, 2), (3, 3), (4, 2), (4, 3)])
 def test_single_cell_ambiguity_selection(lmout, initial, i_x, i_y):
     """Test the selection of ambiguity with the lowest cost"""
-    selected_ambiguity = spatial_selection.single_cell_ambiguity_selection(
+    selected_ambiguity = spatial_selection.__single_cell_ambiguity_selection(
         lmout, initial, i_x, i_y, cost, window=3
     )
     assert selected_ambiguity == 2
