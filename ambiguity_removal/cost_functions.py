@@ -30,12 +30,12 @@ def calculate_Euclidian_distance_to_neighbours(
 
     Parameters
     ----------
-    L2_sel : ``xarray.dataset``
+    L2_sel : ``xarray.DataSet``
         OSCAR L2 dataset containing the cell of interest and its ambiguities.
         Must have 'Ambiguities' dimension,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
         data variables.
-    L2_neighbours : xarray dataset
+    L2_neighbours : ``xarray.DataSet``
         OSCAR L2 dataset containing the neighbours of the cell of interest,
         with the middle cell being the pre-selected ambiguity of cell of interest.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,

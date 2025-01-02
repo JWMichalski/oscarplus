@@ -20,13 +20,13 @@ def __single_cell_ambiguity_selection(
 
     Parameters
     ----------
-    lmout : ``xarray.dataset``
+    lmout : ``xarray.DataSet``
         OSCAR L2 lmout dataset
         This dataset contains the ambiguities to be selected from.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
         data variables.
-    initial : ``xarray.dataset``
+    initial : ``xarray.DataSet``
         OSCAR L2 dataset
         This dataset contains the initial solution to compare the ambiguities to.
         Must have 'CrossRange' and 'GroundRange' dimensions,
@@ -93,13 +93,13 @@ def solve_ambiguity_spatial_selection(
 
     Parameters
     ----------
-    lmout : ``xarray.Dataset``
+    lmout : ``xarray.DataSet``
         OSCAR L2 lmout dataset
         This dataset contains the ambiguities to be selected from.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
         data variables.
-    initial_solution : ``xarray.dataset``
+    initial_solution : ``xarray.DataSet``
         OSCAR L2 dataset
         This dataset contains the initial solution to compare the ambiguities to.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
@@ -122,7 +122,7 @@ def solve_ambiguity_spatial_selection(
         Additional keyword arguments to pass to the cost function.
     Returns
     -------
-    ``xarray.Dataset``
+    ``xarray.DataSet``
         OSCAR L2 dataset without ambiguities
     """
 
