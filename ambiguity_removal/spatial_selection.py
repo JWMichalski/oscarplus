@@ -5,8 +5,6 @@ This module contains functions to solve the ambiguity using spatial ambiguity se
 
 Functions
 ---------
-- single_cell_ambiguity_selection :
-    Selects the ambiguity with the lowest cost
 - solve_ambiguity_spatial_selection :
     Solves the ambiguity of the L2_lmout dataset using the spatial selection method
 """
@@ -14,7 +12,7 @@ Functions
 import numpy as np
 
 
-def single_cell_ambiguity_selection(
+def __single_cell_ambiguity_selection(
     lmout, initial, i_x, i_y, cost_function, window, **kwargs
 ):
     """
@@ -131,7 +129,7 @@ def solve_ambiguity_spatial_selection(
 
     def select_and_replace_ambiguity(i, j):
         # select ambiguity with the lowest cost
-        selected_ambiguity = single_cell_ambiguity_selection(
+        selected_ambiguity = __single_cell_ambiguity_selection(
             lmout,
             initial_copy,
             i,
