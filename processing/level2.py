@@ -16,8 +16,9 @@ remove_unreliable_cells:
     or oscillations in mid-beam on the 22.05.2022
 """
 
-import seastar as ss
 import xarray as xr
+from seastar.retrieval.level2 import sol2level2
+from seastar.utils import tools as sstools
 from oscarplus.processing.level1 import mask_unreliable_cells
 
 ####################
@@ -29,7 +30,7 @@ def prepare_dataset(L2_sol):
     """
     Prepare the dataset for use in the OSCAR+ algorithm
 
-    Returns a dataset without Antenna dimension and without x coordinate
+    Returns a dataset without 'Antenna' dimension and without x coordinate
     Uses sol2level2 function from seastar.retrieval.level2
     to compute the geophysical parameters
 
@@ -46,7 +47,7 @@ def prepare_dataset(L2_sol):
     """
     L2 = xr.Dataset()
     # retrieve geophysical parameters
-    L2 = ss.retrieval.level2.sol2level2(L2_sol)
+    L2 = sol2level2(L2_sol)
     L2 = L2.mean(dim="Antenna")  # remove Antenna dimension
     L2 = L2.drop("x")  # remove x coordinate
     return L2
@@ -71,7 +72,7 @@ def prepare_MARS2D(model):
         Model dataset with renamed dimensions and data variables
     """
     # add current velocity and direction
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = sstools.currentUV2VelDir(
         model["U"].values, model["V"].values
     )  # converts u and v components to velocity and direction
     model["CurrentVelocity"] = (("time", "nj", "ni"), cvel)
