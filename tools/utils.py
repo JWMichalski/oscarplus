@@ -70,6 +70,12 @@ def get_resolution(DS):
     -------
     ``int``
         Resolution of the dataset in meters.
+    Raises
+    ------
+    ValueError
+        If the 'Resolution' attribute is not found in the dataset.
+        If the 'Resolution' attribute is not in the form '<int>x<int>m'.
+        If the 'Resolution' is not the same in both dimensions.
     """
     if "Resolution" not in DS.attrs:
         raise ValueError("Resolution attribute not found in the dataset")
@@ -213,10 +219,23 @@ def attributes_from_filepath(filepath):
         The track number.
     gmf : ``string``
         The geophysical model function.
+    Raises
+    ------
+    ValueError
+        If the date is not in the form YYYYMMDD.
+        If the month is not between 01 and 12.
+        If the day is not between
     """
     filename = os.path.basename(filepath[:-3])
     attributes = filename.split("_")
     date = attributes[0]
+    if len(date) != 8:
+        raise ValueError("Date must be in the format YYYYMMDD")
+    month, day = int(date[4:6]), int(date[6:])
+    if not (1 <= month <= 12):
+        raise ValueError("Month must be between 01 and 12")
+    if not (1 <= day <= 31):
+        raise ValueError("Day must be between 01 and 31")
     track = attributes[2]
     gmf = attributes[4]
     return date, track, gmf
@@ -440,6 +459,10 @@ def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=
         -------
         float
             elevation of the point.
+        Raises
+        ------
+        ValueError
+            If the longitude or latitude is outside the bathymetry dataset
         """
         return -bathymetry.interp(
             latitude=latitude, longitude=longitude, method="linear"
