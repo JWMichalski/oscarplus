@@ -8,11 +8,11 @@ Functions
 - angle_median_filter :
     Applies an angle median filter to a DataArray
 - directionmagnitude_median_windcurrent :
-    Filters the direction and velocity data with a median filter
+    Filters the OSCAR dataset with angle_median_filter
 - component_median_windcurrent :
-    Component median for wind and current data
+    Filters the OSCAR dataset with component median
 - downscale :
-    Downscale a dataset by a factor
+    Downscale a dataset by a factor along CrossRange and GroundRange coordinates
 """
 
 import numpy as np
@@ -28,23 +28,22 @@ def angle_median_filter(DS, NearestNeighbours, min_NN, window_size=3):
 
     Parameters
     ----------
-    DS : ``xarray.dataarray``
-        dataarray to apply the filter to
-        Must have CrossRange and GroundRange coordinates
-    NearestNeighbours : ``xarray.dataarray``
-        dataarray containing the number of nearest neighbours for each cell
+    DS : ``xarray.DataArray``
+        DataArray to apply the filter to.
+        Must have 'CrossRange' and 'GroundRange' coordinates.
+    NearestNeighbours : ``xarray.DataArray``
+        DataArray containing the number of nearest neighbours for each cell.
     NN_min : ``int``
-        minimum number of nearest neighbours for the filter to be applied
+        A minimum number of nearest neighbours for the filter to be applied.
         If the number of nearest neighbours is less than this value,
-        the filter will return np.nan
+        the filter will return np.nan.
     window_size : ``int``, optional
-        size of the window for the median filter
-        Default is 3
-
+        Size of the window for the median filter.
+        Default is 3.
     Returns
     -------
-    DS_filtered : ``xarray.dataarray``
-        dataarray with the median filter applied
+    DS_filtered : ``xarray.DataArray``
+        DataArray with the median filter applied.
     """
     DS_rolling = DS.rolling(
         {"CrossRange": window_size, "GroundRange": window_size},
@@ -77,22 +76,21 @@ def angle_median_filter(DS, NearestNeighbours, min_NN, window_size=3):
 
 def directionmagnitude_median_windcurrent(L2, min_no_of_NN=2):
     """
-    Filters the direction and velocity data with a median filter
+    Filters the OSCAR dataset with angle_median_filter
 
     Parameters
     ----------
-    L2 : ``xarray.dataset``
+    L2 : ``xarray.DataSet``
         L2 OSCAR dataset
         Must have CrossRange and GroundRange coordinates and
         contain 'CurrentDirection', 'CurrentVelocity',
-        'EarthRelativeWindDirection', 'EarthRelativeWindSpeed' data variables
-
+        'EarthRelativeWindDirection', 'EarthRelativeWindSpeed' data variables.
     Returns
     -------
-    L2_median : ``xarray.dataset``
+    L2_median : ``xarray.DataSet``
         L2 OSCAR dataset with filtered direction and velocity data
         With previous data variables + 'CurrentU', 'CurrentV',
-        'EarthRelativeWindU', 'EarthRelativeWindV'
+        'EarthRelativeWindU', 'EarthRelativeWindV'.
     """
 
     L2_median = L2.copy(deep=True)
@@ -146,25 +144,24 @@ def directionmagnitude_median_windcurrent(L2, min_no_of_NN=2):
 
 def component_median_windcurrent(L2, window_size=3):
     """
-    Component median for wind and current data
+    Filters the OSCAR dataset with component median
 
     Parameters
     ----------
-    L2 : ``xarray.dataset``
-        L2 OSCAR dataset
+    L2 : ``xarray.DataSet``
+        L2 OSCAR dataset.
         Must have CrossRange and GroundRange coordinates and
         contain 'CurrentU', 'CurrentV',
-        'EarthRelativeWindU', 'EarthRelativeWindV' data variables
+        'EarthRelativeWindU', 'EarthRelativeWindV' data variables.
     window_size : ``int``, optional
-        size of the window for the median filter
-        Default is 3
-
+        Size of the window for the median filter.
+        Default is 3.
     Returns
     -------
-    L2 : ``xarray.dataset``
-        L2 OSCAR dataset with filtered direction and velocity data
-        With previous data variables + 'CurrentVelocity', 'CurrentDirection',
-        'EarthRelativeWindSpeed', 'EarthRelativeWindDirection'
+    L2 : ``xarray.DataSet``
+        L2 OSCAR dataset with filtered direction and velocity data.
+        Contains previous data variables + 'CurrentVelocity', 'CurrentDirection',
+        'EarthRelativeWindSpeed', 'EarthRelativeWindDirection'.
     """
 
     def filter_component(DA, window_size):
@@ -197,20 +194,20 @@ def component_median_windcurrent(L2, window_size=3):
 
 def downscale(DS, factor):
     """
-    Downscale a dataset by a factor
+    Downscale a dataset by a factor along CrossRange and GroundRange coordinates.
 
     Parameters
     ----------
-    DS : ``xarray.dataset``
-        Dataset to downscale
+    DS : ``xarray.DataSet``
+        Dataset to downscale.
+        Must contain 'CrossRange' and 'GroundRange' coordinates.
     factor : ``int``
-        Factor to downscale by
-
+        Factor to downscale by.
     Returns
     -------
-    DS_downscaled : ``xarray.dataset``
+    DS_downscaled : ``xarray.DataSet``
         Downscaled dataset.
-        Resolution attribute is updated if present.
+        Resolution attribute updated if present.
     """
     if not isinstance(factor, int):
         raise TypeError("Factor must be an integer")

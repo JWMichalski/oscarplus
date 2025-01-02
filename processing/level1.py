@@ -11,12 +11,12 @@ calculate_sigma0:
 compute_beam_mask:
     Create a mask for the cells with less than 3 looks
 compute_beam_land_mask:
-    Create masks for the land using GSHHS coast data and points with less than 3 looks
+    Create mask for coastal cells and cells with less than 3 looks
 build_geo_dataset:
-    Build a dataset with the geophysical parameters
+    Builds a dataset from the given wind parameters
 mask_unreliable_cells:
     Create a mask for the cells that are unreliable due to inoptimal incidence angle
-    or oscillations in mid-beam on the 22.05.2022
+    or due to oscillations in mid-beam on the 22.05.2022.
 """
 
 import seastar as ss
@@ -29,24 +29,21 @@ from scipy.ndimage import binary_dilation
 def calculate_sigma0(L1b):
     """
     This function calculates the sigma0 from intensity
+
     Sigma0 is calculated as the difference between
     the intensity and the mean intensity in the CrossRange direction,
     but with the GroundRange mean of the CrossRange mean intensity added to normalize.
 
     Parameters
     ----------
-    L1b : xarray.Dataset
-        L1b dataset
-        Must contain the following dimensions:
-        - CrossRange
-        - GroundRange
-        Must contain the following variables:
-        - Intensity
-
+    L1b : ``xarray.DataSet``
+        L1b dataset.
+        Must contain 'CrossRange' and 'GroundRange' dimensions
+        and 'Intensity' variable.
     Returns
     -------
-    L1b : xarray.Dataset
-        L1b dataset with the Sigma0_db variable added
+    ``xarray.DataSet``
+        L1b dataset with the 'Sigma0_db' variable added.
     """
     Intensity_db = ss.utils.tools.lin2db(L1b["Intensity"])
     L1b["Sigma0_db"] = (
@@ -68,13 +65,12 @@ def compute_beam_mask(DA):
     Parameters
     ----------
     DA : ``xarray.DataArray``
-        L1c OSCAR data array to compute the mask on
-
+        L1c OSCAR data array to compute the mask on.
     Returns
     -------
-    mask : ``xarray.DataArray``
-        mask for the cells with less than 3 looks
-        True where the data is valid and False where it is not
+    ``xarray.DataArray``
+        Mask for the cells with less than 3 looks.
+        True where the data is valid and False where it is not.
     """
     # create a mask for each antenna with 1 where there is data and 0 where there is not
     a = [xr.where(np.isnan(DA.sel(Antenna=a)), 0, 1) for a in DA.Antenna.data]
@@ -85,22 +81,24 @@ def compute_beam_mask(DA):
 
 def compute_beam_land_mask(L1c, dilation=2):
     """
-    create masks for the land using GSHHS coast data and points with less than 3 looks
-    Merge them together
+    Create mask for coastal cells and cells with less than 3 looks
+
+    Uses the GSHHS coast data to create a mask for the land and
+    compute_beam_mask for the cells with less than 3 looks.
+    Merges the two masks together.
 
     Parameters
     ----------
     L1c : ``xarray.Dataset``
-        L1c OSCAR data to compute the mask on
+        L1c OSCAR data to compute the mask on.
     dilation : ``int``, optional
-        number of iterations for binary dilation
-        Default is 2
-
+        Number of iterations for binary dilation.
+        Default is 2.
     Returns
     -------
-    mask : ``xarray.DataArray``
-        mask for the land and points with less than 3 looks
-        True where the data is valid and False where it is not
+    ``xarray.DataArray``
+        Mask for the land and points with less than 3 looks.
+        True where the data is valid and False where it is not.
     """
     DA = L1c["Sigma0"]
     land_mask = ss.utils.tools.compute_land_mask_from_GSHHS(
@@ -121,21 +119,20 @@ def compute_beam_land_mask(L1c, dilation=2):
 
 def build_geo_dataset(L1c, windspeed, winddirection):
     """
-    build a dataset with the geophysical parameters
+    Builds a dataset from the given wind parameters
 
     Parameters
     ----------
     L1c : ``xarray.Dataset``
-        Used for the coordinates and dimensions of the data
+        Used for the coordinates and dimensions of the data.
     windspeed: ``float``
-        Wind speed in m/s
+        Wind speed in m/s.
     winddirection: ``float``
-        Wind direction in degrees
-
+        Wind direction in degrees.
     Returns
     -------
-    geo : ``xarray.Dataset``
-        Dataset with the geophysical parameters
+    ``xarray.DataSet``
+        Dataset with the geophysical parameters.
     """
     geo = xr.Dataset()
     geo["EarthRelativeWindSpeed"] = xr.DataArray(
@@ -160,20 +157,19 @@ def build_geo_dataset(L1c, windspeed, winddirection):
 def mask_unreliable_cells(L1c):
     """
     Create a mask for the cells that are unreliable due to inoptimal incidence angle
-    or oscillations in mid-beam on the 22.05.2022.
+    or due to oscillations in mid-beam on the 22.05.2022.
     This mask always covers the far range cells
-    and the cells with a Sigma0 value over a certain threshold for the 22.05.2022.
+    and the near range cells for the 22.05.2022.
 
     Parameters
     ----------
-    L1c : ``xarray.Dataset``
-        The L1c dataset with DateTaken attribute.
-
+    L1c : ``xarray.DataSet``
+        The L1c dataset with the 'DateTaken' attribute.
     Returns
     -------
-    mask : ``numpy.ndarray``
-        The mask for the untrustworthy cells.
-        True for unreliable, False for unreliable.
+    ``xarray.DataArray``
+        The mask covering the untrustworthy cells.
+        True for unreliable, False for reliable.
     """
     date = L1c.attrs["DateTaken"]
     resolution = L1c.attrs["Resolution"]
@@ -183,7 +179,7 @@ def mask_unreliable_cells(L1c):
         resolution_multiplier = 2
     else:
         resolution_multiplier = 1
-        warnings.warn("Resolution not recognized, using resolution multiplier of 1")
+        warnings.warn("Resolution not recognized, using a resolution multiplier of 1")
 
     far_range_mask = xr.DataArray(
         False,

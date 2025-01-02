@@ -5,8 +5,6 @@ This module contains functions to solve the ambiguity using spatial ambiguity se
 
 Functions
 ---------
-- single_cell_ambiguity_selection :
-    Selects the ambiguity with the lowest cost function value
 - solve_ambiguity_spatial_selection :
     Solves the ambiguity of the L2_lmout dataset using the spatial selection method
 """
@@ -14,27 +12,26 @@ Functions
 import numpy as np
 
 
-def single_cell_ambiguity_selection(
+def __single_cell_ambiguity_selection(
     lmout, initial, i_x, i_y, cost_function, window, **kwargs
 ):
     """
-    Selects the ambiguity with the lowest cost function value
-    based on a box around the cell
+    Selects the ambiguity with the lowest cost based on a box around the cell
 
     Parameters
     ----------
-    lmout : ``xarray.dataset``
+    lmout : ``xarray.DataSet``
         OSCAR L2 lmout dataset
         This dataset contains the ambiguities to be selected from.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
-    initial : ``xarray.dataset``
+        data variables.
+    initial : ``xarray.DataSet``
         OSCAR L2 dataset
         This dataset contains the initial solution to compare the ambiguities to.
         Must have 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
+        data variables.
     i_x : ``int``
         Index of the `CrossRange` dimension
     i_j : ``int``
@@ -42,18 +39,17 @@ def single_cell_ambiguity_selection(
     cost_function : ``function``
         Function to calculate the cost of the ambiguities.
         Must take:
-            single cell from `lmout`,
-            a box around it from `initial` as input, current_weight
-        Return total cost for all for ambiguities
+            - single cell from `lmout`,
+            - a box around it from `initial` as input, current_weight.
+        Return total cost for all for ambiguities.
     window : ``int``, optional
-        Size of the box around the cell
-        Must be an odd number
+        Size of the box around the cell.
+        Must be an odd number.
     **kwargs : ``**kwargs``, optional
-        Additional keyword arguments to pass to the cost function
-
+        Additional keyword arguments to pass to the cost function.
     Returns
     -------
-    selected_ambiguity: ``int``
+    ``int``
         Index of the selected ambiguity
     """
     if window % 2 == 0:
@@ -93,46 +89,46 @@ def solve_ambiguity_spatial_selection(
     **kwargs
 ):
     """
-    Solves the ambiguity of the L2_lmout dataset using the spatial selection method
+    Solves the ambiguity of the L2_lmout dataset using a spatial selection method
 
     Parameters
     ----------
-    lmout : ``xarray.Dataset``
+    lmout : ``xarray.DataSet``
         OSCAR L2 lmout dataset
         This dataset contains the ambiguities to be selected from.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
-    initial_solution : ``xarray.dataset``
+        data variables.
+    initial_solution : ``xarray.DataSet``
         OSCAR L2 dataset
         This dataset contains the initial solution to compare the ambiguities to.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
+        data variables.
     cost_function : ``function``
         Function to calculate the cost of the ambiguities.
         Must take:
-            single cell from `lmout`
-            a box around it from `initial`
-            any additional keyword arguments
-        and return total cost for all 4 ambiguities
+            - single cell from `lmout`
+            - a box around it from `initial`
+            - any additional keyword arguments
+        and return total cost for each of 4 ambiguities.
     pass_number : ``int``, optional
-        Number of passes to iterate through the dataset
-        Default is 2
+        Number of passes to iterate through the dataset.
+        Default is 2.
     inplace : ``bool``, optional
-        Whether to modify the input dataset in place
-        Default is True
+        Whether to modify the input dataset in place.
+        Default is True.
     **kwargs : ``**kwargs``, optional
-        Additional keyword arguments to pass to the cost function
+        Additional keyword arguments to pass to the cost function.
     Returns
     -------
-    L2: ``xarray.Dataset``
-        OSCAR L2 dataset with solved ambiguities
+    ``xarray.DataSet``
+        OSCAR L2 dataset without ambiguities
     """
 
     def select_and_replace_ambiguity(i, j):
         # select ambiguity with the lowest cost
-        selected_ambiguity = single_cell_ambiguity_selection(
+        selected_ambiguity = __single_cell_ambiguity_selection(
             lmout,
             initial_copy,
             i,

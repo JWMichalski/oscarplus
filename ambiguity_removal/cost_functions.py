@@ -24,41 +24,45 @@ def calculate_Euclidian_distance_to_neighbours(
     """
     Calculates cost using Euclidian distance or squared Euclidian distancee
 
-    The cost is the Euclidian distance
+    The cost is based on the Euclidian distance
     between each ambiguity of the cell and its neighbours:
-    a sum of current distance*current_weight and wind distance
+    cost = current_distance*windcurrentratio + wind distance
+
+    Parameters
     ----------
-    L2_sel : ``xarray.dataset``
+    L2_sel : ``xarray.DataSet``
         OSCAR L2 dataset containing the cell of interest and its ambiguities.
-        Must have 'Ambiguities' dimensions,
+        Must have 'Ambiguities' dimension,
         and 'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
-    L2_neighbours : xarray dataset
-        OSCAR L2 dataset containing the neighbours of the cell of interest
+        data variables.
+    L2_neighbours : ``xarray.DataSet``
+        OSCAR L2 dataset containing the neighbours of the cell of interest,
+        with the middle cell being the pre-selected ambiguity of cell of interest.
         Must have 'Ambiguities', 'CrossRange' and 'GroundRange' dimensions,
         and'CurrentU', 'CurrentV', 'EarthRelativeWindU', 'EarthRelativeWindV'
-        data variables
-        Additional keyword arguments to pass to the cost function
+        data variables.
     Euclidian_method : ``str``, optional
-        Method to calculate the Euclidian distance
-        Must be 'standard' or 'squared'
-        Default is 'standard'
+        Method to calculate the Euclidian distance.
+        Must be 'standard' or 'squared'.
+        Default is 'standard'.
     method : ``str``, optional
-        Method to calculate the cost
-        Must be 'windcurrent', 'wind' or 'current'
-        Default is 'windcurrent'
+        Method to calculate the cost.
+        Must be 'windcurrent', 'wind' or 'current':
+        - 'windcurrent' : uses both wind and current distance
+        - 'wind' : uses only wind distance
+        - 'current' : uses only current distance
+        Default is 'windcurrent'.
     windcurrentratio : ``int``, optional
-        Ratio of the weight of the current to the weight of the wind
-        Default is 10
+        Ratio of the weight of the current to the weight of the wind.
+        Only used if method is 'windcurrent'.
+        Default is 10.
     include_centre : ``bool``, optional
-        Whether to include the centre cell in the cost function
-        Default is False
-    **kwargs : ``**kwargs``, optional
-        Additional keyword arguments to pass to the cost function
+        Whether to include the original centre cell in the distance calculation.
+        Default is False.
     Returns
     -------
-    TotalCost : ``numpy.array``
-        Total cost for each ambiguity
+    ``xarray.DataArray``
+        Cost of the ambiguities.
     """
     if Euclidian_method == "standard":
         power = 0.5

@@ -22,8 +22,8 @@ def __drop_rotated_components(DS):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset from which to drop the rotated components
+    DS : ``xarray.DataSet``
+        Dataset from which to drop the rotated components.
     """
     if "CurrentU_rot" and "CurrentV_rot" in DS:
         DS = DS.drop(
@@ -47,16 +47,16 @@ def calculate_secondary_products(DS, resolution=None):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset for which to calculate the secondary products
-        Must contain the following coordinates: latitude, longitude
-        and the following variables: CurrentU, CurrentV
+    DS : ``xarray.DataSet``
+        Dataset for which to calculate the secondary products.
+        Must contain the following coordinates: 'latitude', 'longitude'
+        and the following variables: 'CurrentU', 'CurrentV'.
         Optional variables to calculate secondary products:
-        EarthRelativeWindU, EarthRelativeWindV
+        'EarthRelativeWindU', 'EarthRelativeWindV'.
     resolution : ``int``
         Integer, containing the resolution of the data in meters.
-        Default is None
-        If None, DS must contain the Resolution attribute formatted as "YYYxYYYm"
+        Default is None.
+        If None, DS must contain the Resolution attribute formatted as "YYYxYYYm".
     """
     def calculate_secondary_product(product):
         # Calculate the divergence
@@ -113,12 +113,12 @@ def calculate_upwelling_SWT(DS, depth):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset with coordinates: latitude, longitude
-        and variables: CurrentU_rot, CurrentV_rot
+    DS : ``xarray.DataSet``
+        Dataset with coordinates: 'latitude', 'longitude'
+        and variables: 'CurrentU_rot', 'CurrentV_rot'
     depth : ``xarray.DataArray``
-        Depth data. Coordinates: latitude, longitude
-        Must be increase with depthS
+        Depth data. Coordinates: 'latitude', 'longitude'
+        Must increase with depth
     """
     # Interpolate depth to DS using longitude and latitude
     interpolated_depth = depth.interp(
