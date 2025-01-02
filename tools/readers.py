@@ -7,7 +7,7 @@ This module contains the functions that read the data from the files.
 Functions
 ---------
 get_data_dirs : ``dict``
-    Find the directories containing the data
+    Return the directories containing the data
 read_OSCAR : ``xarray.Dataset, string``
     Read the OSCAR data from the given directory
 get_wind_data : ``float, float``
@@ -63,12 +63,12 @@ def __load_data_dirs():
 
 def get_data_dirs():
     """
-    Find the directories containing the data
+    Return the directories containing the data
 
     Returns
     -------
     __data_dirs : ``dict``
-        Dictionary containing the directories containing the data
+        Dictionary listing the directories containing the data.
     """
     return __data_dirs
 
@@ -81,32 +81,39 @@ def read_OSCAR_from_file(
     resolution=None,
     gmf=None,
     warn=True,
-    ):
+):
     """
     Read the OSCAR data from the given file
 
     Parameters
     ----------
     filepath : ``string``
-        Path to the file containing the OSCAR data
+        Path to the file containing the OSCAR data.
     date : ``string``
-        Date of the OSCAR data
+        Date of the OSCAR data.
     track : ``string``
-        Track of the OSCAR data
+        Track of the OSCAR data.
     level : ``string``
-        Level of the OSCAR data (L1c, L2 lmout, L2 or L2 MF)
+        Level of the OSCAR data (L1c, L2 lmout, L2 or L2 MF).
     resolution : ``string``, optional
-        Resolution of the OSCAR data
-        REQUIRED for levels other than L1b and L1c if it is not already an attribute in the dataset.
-        Does not do anything if level is L1b or L1c.
+        Resolution of the OSCAR data.
+        REQUIRED for levels other than L1b and L1c,
+        if it is not already an attribute in the dataset.
+        Not used if level is L1b or L1c.
         Default is None
     gmf : ``string``, optional
         Geophysical Model Function name
-        REQUIRED for levels other than L1b and L1c if it is not already an attribute in the dataset.
-        Does not do anything if level is L1b or L1c.
-        Default is None
+        REQUIRED for levels other than L1b and L1c,
+        if it is not already an attribute in the dataset.
+        Not used if level is L1b or L1c.
+        Default is None.
     warn : ``bool``, optional
-        Whether to warn if attributes are not found
+        Whether to warn if attributes are not found.
+        Default is True.
+    Returns
+    -------
+    DS : ``xarray.DataSet``
+        Dataset containing the OSCAR data.
     """
     DS = ss.utils.readers.readNetCDFFile(filepath)
 
@@ -148,65 +155,117 @@ def read_OSCAR(
     **kwargs,
 ):
     """
-    Read the OSCAR data from the given directory with all the OSCAR data
-    Assumes the data is in the Iroise Sea region and different levels are in different subfolders (more in 1.4 in README)
-    Automatically selects the file based on the provided attributes
+    Read the OSCAR data from the directory with all the OSCAR data.
+
+    Assumes the data is in the Iroise Sea region
+    and different levels are in different subfolders (more in 1.4 in README).
+    Automatically selects the file based on the provided attributes.
 
     Parameters
     ----------
     date : ``string``
-        Date of the OSCAR data
+        Date of the OSCAR data.
     track : ``string``
-        Track of the OSCAR data
+        Track of the OSCAR data.
     gmf : ``string``
-        Geophysical Model Function name
+        Geophysical Model Function name.
     level : ``string``
-        Level of the OSCAR data (L1c, L2 lmout, L2 or L2 MF)
+        Level of the OSCAR data (L1c, L2 lmout, L2 or L2 MF).
     resolution : ``string``, optional
-        Resolution of the OSCAR data
-        Default is '200x200m'
+        Resolution of the OSCAR data.
+        Default is '200x200m'.
     OSCAR_data_dir : ``string``, optional
-        Path to the directory containing the OSCAR data
-        If none is given, the data directory is selected from data_dir.txt
+        Path to the directory containing the OSCAR data.
+        If none is given, the data directory is read from data_dir.txt.
     **kwargs : ``dict``
-        Additional keyword arguments
+        Additional keyword arguments.
     Returns
     -------
-    DS : ``xarray.Dataset``
-        Dataset containing the OSCAR data
+    DS : ``xarray.DataSet``
+        Dataset containing the OSCAR data.
     DS_path : ``string``
-        Path to the file containing the OSCAR data
+        Path to the file containing the OSCAR data.
     """
     if OSCAR_data_dir is None:
         OSCAR_data_dir = __data_dirs["OSCAR"]
 
     match level:
         case "L1b":
-            DS_path = os.path.join(OSCAR_data_dir, "Iroise Sea L1b", f"{date}_Track_{track}_OSCAR_L1b.nc")
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, **kwargs)
+            DS_path = os.path.join(
+                OSCAR_data_dir, "Iroise Sea L1b", f"{date}_Track_{track}_OSCAR_L1b.nc"
+            )
+            DS = read_OSCAR_from_file(
+                DS_path, date=date, track=track, level=level, **kwargs
+            )
         case "L1c":
-            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L1c", f"{date}_Track_{track}_OSCAR_{resolution}_L1c.nc")
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, **kwargs)
+            DS_path = os.path.join(
+                OSCAR_data_dir,
+                f"Iroise Sea {resolution} L1c",
+                f"{date}_Track_{track}_OSCAR_{resolution}_L1c.nc",
+            )
+            DS = read_OSCAR_from_file(
+                DS_path, date=date, track=track, level=level, **kwargs
+            )
         case "L2 lmout":
             DS_path = os.path.join(
                 OSCAR_data_dir,
                 f"Iroise Sea {resolution} L2 lmout",
-                f"{date}_Track_{track}_{resolution}_{gmf}_lmout.nc"
+                f"{date}_Track_{track}_{resolution}_{gmf}_lmout.nc",
             )
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, resolution=resolution, gmf=gmf, **kwargs)
+            DS = read_OSCAR_from_file(
+                DS_path,
+                date=date,
+                track=track,
+                level=level,
+                resolution=resolution,
+                gmf=gmf,
+                **kwargs,
+            )
         case "L2":
             DS_path = os.path.join(
                 OSCAR_data_dir,
                 f"Iroise Sea {resolution} L2",
-                f"{date}_Track_{track}_{resolution}_{gmf}_L2.nc"
+                f"{date}_Track_{track}_{resolution}_{gmf}_L2.nc",
             )
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, resolution=resolution, gmf=gmf, **kwargs)
+            DS = read_OSCAR_from_file(
+                DS_path,
+                date=date,
+                track=track,
+                level=level,
+                resolution=resolution,
+                gmf=gmf,
+                **kwargs,
+            )
         case "L2 MF":
-            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L2 MF", f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc")
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, resolution=resolution, gmf=gmf, **kwargs)
+            DS_path = os.path.join(
+                OSCAR_data_dir,
+                f"Iroise Sea {resolution} L2 MF",
+                f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc",
+            )
+            DS = read_OSCAR_from_file(
+                DS_path,
+                date=date,
+                track=track,
+                level=level,
+                resolution=resolution,
+                gmf=gmf,
+                **kwargs,
+            )
         case "L2a MF":
-            DS_path = os.path.join(OSCAR_data_dir, f"Iroise Sea {resolution} L2a MF", f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc")
-            DS = read_OSCAR_from_file(DS_path, date=date, track=track, level=level, resolution=resolution, gmf=gmf, **kwargs)
+            DS_path = os.path.join(
+                OSCAR_data_dir,
+                f"Iroise Sea {resolution} L2a MF",
+                f"{date}_Track_{track}_{resolution}_{gmf}_MF.nc",
+            )
+            DS = read_OSCAR_from_file(
+                DS_path,
+                date=date,
+                track=track,
+                level=level,
+                resolution=resolution,
+                gmf=gmf,
+                **kwargs,
+            )
         case _:
             raise ValueError("level must be L1b, L1c, L2 lmout, L2, L2 MF, L2a MF")
     return DS, DS_path
@@ -257,23 +316,24 @@ def get_wind_data(date, track, csv_path):
 
 def read_MARS2D(filename, resolution, file_path=None):
     """
-    Read the MARS2D model data from the given directory
-    Renames the variables to match the OSCAR data
-    Adds resolution attribute
+    Read the MARS2D model data from the given directory.
+
+    Renames the variables to match the OSCAR data.
+    Adds resolution attribute.
 
     Parameters
     ----------
     filename : ``string``
-        Name of the file containing the MARS model data
+        Name of the file containing the MARS2D model data.
     resolution : ``string``
-        Resolution of the MARS data (in meters)
+        Resolution of the MARS2D data (in meters).
     file_path : ``string``, optional
-        Path to the file containing the MARS model data
-        If none is given, the data directory is selected from data_dir.txt
+        Path to the file containing the MARS2D model data.
+        If none is given, the data directory is selected from data_dir.txt.
     Returns
     -------
-    MARS2D : ``xarray.Dataset``
-        Dataset containing the MARS2D model data with the renamed variables
+    ``xarray.DataSet``
+        Dataset containing the MARS2D model data with the renamed variables.
     """
     if file_path is None:
         file_path = os.path.join(__data_dirs["MARS2D"], filename)
@@ -300,22 +360,23 @@ def read_MARS2D(filename, resolution, file_path=None):
 def read_MARS3D(filename, resolution, file_path=None):
     """
     Read the MARS3D model data from the given directory
-    Renames the variables to match the OSCAR data
-    Adds resolution attribute
+
+    Renames the variables to match the OSCAR data.
+    Adds resolution attribute.
 
     Parameters
     ----------
     filename : ``string``
-        Name of the file containing the MARS model data
+        Name of the file containing the MARS model data.
     resolution : ``string``
-        Resolution of the MARS data (in meters)
+        Resolution of the MARS3D data (in meters).
     file_path : ``string``, optional
-        Path to the file containing the MARS model data
-        If none is given, the data directory is selected from data_dir.txt
+        Path to the file containing the MARS model data.
+        If none is given, the data directory is selected from data_dir.txt.
     Returns
     -------
-    MARS3D : ``xarray.Dataset``
-        Dataset containing the MARS3D model data with the renamed variables
+    MARS3D : ``xarray.DataSet``
+        Dataset containing the MARS3D model data with the renamed variables.
     """
     if file_path is None:
         file_path = os.path.join(__data_dirs["MARS3D"], filename)

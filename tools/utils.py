@@ -49,10 +49,10 @@ def set_resolution(DS, resolution):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset to set the resolution of
+    DS : ``xarray.DataSet``
+        Dataset to set the resolution of.
     resolution : ``int``
-        Resolution to add to the dataset to in meters
+        Resolution to add to the dataset to in meters.
     """
     DS.attrs["Resolution"] = f"{resolution}x{resolution}m"
 
@@ -63,13 +63,13 @@ def get_resolution(DS):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset to get the resolution of
-        Must have the attribute 'Resolution' in the form '<int>x<int>m'
+    DS : ``xarray.DataSet``
+        Dataset to get the resolution of.
+        Must have the 'Resolution' attribute in the form '<int>x<int>m'.
     Returns
     -------
-    resolution : ``int``
-        Resolution of the dataset in meters
+    ``int``
+        Resolution of the dataset in meters.
     """
     if "Resolution" not in DS.attrs:
         raise ValueError("Resolution attribute not found in the dataset")
@@ -96,22 +96,22 @@ def get_resolution(DS):
 
 def cut_NaNs(DS, data_variable="CurrentU"):
     """
-    cut the NaNs from the dataset
+    Cut the NaNs from the dataset
 
     Cuts rectangles with only NaNs out of the dataset
-    by decreasing GroundRange and CrossRange dimensions
+    by decreasing GroundRange and CrossRange dimensions.
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        DS OSCAR data to cut the NaNs from
+    DS : ``xarray.DataSet``
+        OSCAR data to cut the NaNs from.
     data_variable : ``string``, optional
-        Name of the data variable to base the NaNs removal on
-        Default is 'CurrentU'
+        Name of the data variable to base the NaNs removal on.
+        Default is 'CurrentU'.
     Returns
     -------
-    DS : ``xarray.Dataset``
-        DS OSCAR data with NaNs removed
+    ``xarray.DataSet``
+        OSCAR data with NaNs removed.
     """
     DS = DS.where(DS[data_variable].notnull(), drop=True)
     return DS
@@ -122,16 +122,17 @@ def no_of_NN(DA):
     This function computes the number of non-NaN nearest neighbours
     for each cell in the DS dataset
 
-    Works in place, adds a new data variable 'NoOfNearestNeighbours' to the DS dataset
+    Works in place, adds a new data variable 'NoOfNearestNeighbours' to the DS dataset.
+
     Parameters
     ----------
-    DA : ``xarray.dataarray``
-        Dataarray with dimensions 'CrossRange' and 'GroundRange',
-        containing the data variable to be processed
+    DA : ``xarray.DataArray``
+        Contains the data variable to be processed.
+        Must have 'CrossRange' and 'GroundRange' dimensions.
     Returns
     -------
-    NN : ``xarray.dataset``
-        Dataarray containing the number of nearest neighbours for each cell
+    ``xarray.DataArray``
+        Contains the number of nearest neighbours for each cell.
     """
     assert isinstance(DA, xr.DataArray), "DA must be a DataArray"
     cross_range_size = DA.CrossRange.sizes["CrossRange"]
@@ -170,19 +171,18 @@ def no_of_NN(DA):
 
 def find_track_angle(DS):
     """
-    Finds the bearing of the airplane
+    Finds the bearing of the airplane that collected the data
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        xarray.Dataset, containing the OSCAR data
+    DS : ``xarray.DataSet``
+        Contains the OSCAR data
         with the variables 'latitude' and 'longitude'
-        and the dimensions 'GroundRange' and 'CrossRange'
-
+        and the dimensions 'GroundRange' and 'CrossRange'.
     Returns
     -------
     ``float``
-        Bearing of the airplane in degrees
+        Bearing of the airplane in degrees.
     """
     lon_beg = DS["longitude"].isel(GroundRange=0, CrossRange=0).values
     lat_beg = DS["latitude"].isel(GroundRange=0, CrossRange=0).values
@@ -200,19 +200,19 @@ def attributes_from_filepath(filepath):
     Parameters
     ----------
     filepath : ``string``
-        The filepath to extract the attributes from
+        The filepath to extract the attributes from.
         The name of the file must be in form:
-        YYYYMMDD_Track_XX_RESOLUTION_GMF_.nc
-        Track do not have to be two symbols long
-
+        YYYYMMDD_Track_XX_RESOLUTION_GMF_<...>.nc
+        Track number can be any length.
+        <...> can be any string.
     Returns
     -------
     date : ``string``
-        The date of the track
+        The date of the track.
     track : ``string``
-        The track number
+        The track number.
     gmf : ``string``
-        The geophysical model function
+        The geophysical model function.
     """
     filename = os.path.basename(filepath[:-3])
     attributes = filename.split("_")
@@ -225,6 +225,15 @@ def attributes_from_filepath(filepath):
 def __find_first_last_notnan_latitude_longitude(row):
     """
     Find lat lon of the first and last non-NaN values in a row.
+
+    Parameters
+    ----------
+    row : ``xarray.DataArray``
+        The row to find the first and last non-NaN values in.
+    Returns
+    -------
+    first_notnan : ``dict``
+        The latitude and longitude of the first non-NaN value.
     """
     def find_first_notnan_index(row, reverse=False):
         """ "
@@ -260,23 +269,24 @@ def __find_first_last_notnan_latitude_longitude(row):
 def find_track_corners(DA):
     """
     Find latitude and longitude of corners with non-NaN values
-    The corners are the first and last non-NaN values in the first and last row
+
+    The corners are the first and last non-NaN values in the first and last row.
 
     Parameters
     ----------
     DA : ``xarray.DataArray``
-        The data array to find the corners of
+        The data array to find the corners of,
 
     Returns
     -------
     first_notnan_first_row : ``dict``
-        The latitude and longitude of the first non-NaN value in the first row
+        The latitude and longitude of the first non-NaN value in the first row.
     last_notnan_first_row : ``dict``
-        The latitude and longitude of the last non-NaN value in the first row
+        The latitude and longitude of the last non-NaN value in the first row.
     first_notnan_last_row : ``dict``
-        The latitude and longitude of the first non-NaN value in the last row
+        The latitude and longitude of the first non-NaN value in the last row.
     last_notnan_last_row : ``dict``
-        The latitude and longitude of the last non-NaN value in the last row
+        The latitude and longitude of the last non-NaN value in the last row.
     """
     first_notnan_first_row, last_notnan_first_row = (
         __find_first_last_notnan_latitude_longitude(DA[:, 0])
@@ -295,28 +305,29 @@ def find_track_corners(DA):
 def find_six_track_corners(DA):
     """
     Find latitude and longitude of corners with non-NaN values
+
     The corners are the first and last non-NaN values in the first, second and last row
-    Used for the track with corners cut off in median filtering
+    Used for the track with corners cut off in median filtering.
 
     Parameters
     ----------
     DA : ``xarray.DataArray``
-        The data array to find the corners of
+        The data array to find the corners of.
 
     Returns
     -------
     first_notnan_first_row : ``dict``
-        The latitude and longitude of the first non-NaN value in the first row
+        The latitude and longitude of the first non-NaN value in the first row.
     last_notnan_first_row : ``dict``
-        The latitude and longitude of the last non-NaN value in the first row
+        The latitude and longitude of the last non-NaN value in the first row.
     last_notnan_second_row : ``dict``
-        The latitude and longitude of the last non-NaN value in the second row
+        The latitude and longitude of the last non-NaN value in the second row.
     last_notnan_last_row : ``dict``
-        The latitude and longitude of the last non-NaN value in the last row
+        The latitude and longitude of the last non-NaN value in the last row.
     first_notnan_last_row : ``dict``
-        The latitude and longitude of the first non-NaN value in the last row
+        The latitude and longitude of the first non-NaN value in the last row.
     first_notnan_second_row : ``dict``
-        The latitude and longitude of the first non-NaN value in the second row
+        The latitude and longitude of the first non-NaN value in the second row.
     """
     first_notnan_first_row, last_notnan_first_row = (
         __find_first_last_notnan_latitude_longitude(DA[:, 0])
@@ -340,39 +351,40 @@ def find_six_track_corners(DA):
 def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=None):
     """
     Takes a transect of the bathymetry and the current
+
     Parameters
     ----------
-    DS : ``xarray.dataset``
+    DS : ``xarray.DataSet``
         DS with
         'GroundRange' and 'CrossRange' coordinates;
         'longitude' and 'latitude' coordinates;
         'CurrentVelocity', 'CurrentDirection', 'CurrentDivergence' data variables;
-        'Resolution' attribute
-        If 'CurrentW' is present it will be added to the transect
-    bathymetry : ``xarray.dataset``
-        bathymetry data with 'elevation' data variable
+        'Resolution' attribute.
+        If 'CurrentW' is present it will be added to the transect.
+    bathymetry : ``xarray.DataSet``
+        Bathymetry data with 'elevation' data variable.
     iGround : ``int``
-        GroundRange index of the starting cell
+        GroundRange index of the starting cell.
     jCross : ``int``
-        CrossRange index of the starting cell
+        CrossRange index of the starting cell.
     angle : ``float``
-        angle of the transect
-        Must be a multiple of 45 degrees in range [0, 315]
+        Angle of the transect.
+        Must be a multiple of 45 degrees in range [0, 315].
     max_length : ``int``, optional
-        maximum length of the transect in number of cells
-        May be less if the transect reaches a NaN value or dataset edge
-        Default is 1000
+        Maximum length of the transect in number of cells.
+        May be less if the transect reaches a NaN value or dataset edge.
+        Default is 1000.
     handiness : ``str``, optional
-        handiness of the data
-        Must be either 'right', 'left' or None
-        'right': GroundRange 90 degrees to the right of Cross Range
-        'left': GroundRange 90 degrees to the left of Cross Range
-        None: the script will try to determine the handiness
-        Default is None
+        Handiness of the data.
+        Must be either 'right', 'left' or None:
+        - 'right': GroundRange 90 degrees to the right of Cross Range.
+        - 'left': GroundRange 90 degrees to the left of Cross Range.
+        - None: the script will try to determine the handiness.
+        Default is None.
     Returns
     -------
     transectOSCAR : ``pandas.DataFrame``
-        DataFrame with the transect of OSCAR data and elevation of bathymetry
+        DataFrame with the transect of OSCAR data and elevation of bathymetry.
     transectElevation : ``pandas.DataFrame``
         DataFrame with the transect of elevation data.
         Provided at 2 points per OSCAR data point
@@ -381,16 +393,17 @@ def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=
     def make_OSCAR_dict(DS_row, distance):
         """
         Create a dictionary with the OSCAR data
+
         Parameters
         ----------
-        DS_row : ``xarray.Dataset``
-            row of the L2 dataset
+        DS_row : ``xarray.DataSet``
+            row of the L2 dataset.
         distance : ``float``
-            distance from the starting point
+            distance from the starting point.
         Returns
         -------
-        dict
-            dictionary with the OSCAR data
+        ``dict``
+            dictionary with the OSCAR data.
         """
         point_in_transect = {
             "distance": distance,
@@ -420,13 +433,13 @@ def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=
         Parameters
         ----------
         longitude : ``float``
-            longitude of the point
+            longitude of the point.
         latitude : ``float``
-            latitude of the point
+            latitude of the point.
         Returns
         -------
         float
-            elevation of the point
+            elevation of the point.
         """
         return -bathymetry.interp(
             latitude=latitude, longitude=longitude, method="linear"
@@ -591,11 +604,11 @@ def align_with_track(DS):
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset for which to rotate the components
+    DS : ``xarray.DataSet``
+        Dataset for which to rotate the components.
         Must contain the following coordinates: latitude, longitude
         and following variables: CurrentU, CurrentV
-        or/and EarthRelativeWindU, EarthRelativeWindV
+        or/and EarthRelativeWindU, EarthRelativeWindV.
     """
     # Rotate the coords to align with the track
     if "CurrentU" and "CurrentV" in DS:
@@ -627,28 +640,28 @@ def align_with_track(DS):
 def find_closest_lon_lat(given_longitude, given_latitude, DS):
     """
     Find the closest longitude and latitude in the MARS dataset to
-    the given longitude and latitude
-    WARNING: Measures the distance quadratically, not suitable for large distances
+    the given longitude and latitude.
+    WARNING: Measures the distance quadratically, not suitable for large distances.
 
     Parameters
     ----------
     given_latitude : ``float``
-        The given latitude
+        The given latitude.
     given_longitude : ``float``
-        The given longitude
-    DS : ``xarray.Dataset``
-        The MARS dataset
+        The given longitude.
+    DS : ``xarray.DataSet``
+        The MARS dataset.
         Must contain the following variables:
             - longitude
             - latitude
             - GroundRange
-            - CrossRange
+            - CrossRange.
     Returns
     -------
     ground_range_index : ``int``
-        The index of the ground range
+        The index of the ground range.
     cross_range_index : ``int``
-        The index of the cross range
+        The index of the cross range.
     """
 
     # Find the closest longitude and latitude in the MARS dataset
@@ -675,25 +688,25 @@ def find_closest_lon_lat(given_longitude, given_latitude, DS):
 
 def cut_to_extent(DS, extent):
     """
-    Cut the dataset to the given extent
-    WARNING: Measures the distance quadratically, not suitable for large distances
+    Cut the dataset to the given extent.
+    WARNING: Measures the distance quadratically, not suitable for large distances.
 
     Parameters
     ----------
-    DS : ``xarray.Dataset``
-        Dataset to cut to the extent
+    DS : ``xarray.DataSet``
+        Dataset to cut to the extent.
         Must contain the following variables:
             - longitude
             - latitude
             - GroundRange
-            - CrossRange
+            - CrossRange.
     extent : ``list``
-        List of the extent in the form
-        [min_longitude, max_longitude, min_latitude, max_latitude]
+        List of the extent in the form:
+        [min_longitude, max_longitude, min_latitude, max_latitude].
     Returns
     -------
-    DS_out : ``xarray.Dataset``
-        Dataset fitted to the extent
+    ``xarray.DataSet``
+        Dataset fitted to the extent.
     """
     max_GroundRange, max_CrossRange = find_closest_lon_lat(extent[1], extent[3], DS)
     min_GroundRange, min_CrossRange = find_closest_lon_lat(extent[0], extent[2], DS)
