@@ -47,7 +47,6 @@ def __single_cell_ambiguity_selection(
         Must be an odd number.
     **kwargs : ``**kwargs``, optional
         Additional keyword arguments to pass to the cost function.
-
     Returns
     -------
     ``int``
