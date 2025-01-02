@@ -121,6 +121,7 @@ def divergence(f):
     ----------
     f : ``List of np.ndarray``
         List where every item of the list is one dimension of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
@@ -142,6 +143,7 @@ def curl(f):
     ----------
     f : ``list of np.ndarray``
         A list of two arrays, each representing a component of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
@@ -164,6 +166,7 @@ def shear_rate(f):
     ----------
     f : ``list of np.ndarray``
         A list of two arrays, each representing a component of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
@@ -186,6 +189,7 @@ def strain_rate(f):
     ----------
     f : ``list of np.ndarray``
         A list of two arrays, each representing a component of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
@@ -210,6 +214,7 @@ def kinetic_energy_density(f):
     ----------
     f : ``list of np.ndarray``
         A list of two arrays, each representing a component of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
@@ -234,6 +239,7 @@ def enstrophy(f):
     ----------
     f : ``list of np.ndarray``
         A list of two arrays, each representing a component of the vector field.
+        Arrays must have the same shape.
     Returns
     -------
     ``np.ndarray``
