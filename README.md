@@ -40,10 +40,13 @@ Alternatively, you can directly pass paths as arguments when calling reader func
    - Paths to other datasets are optional but can be added if available.
 #### OSCAR Data Directory Structure
 The directory containing OSCAR data must have subdirectories named according to the following format:
+##### Level L1a & L1b
+```Iroise Sea LEVEL```
+##### Level L1c and higher
 ```Iroise Sea RRRxRRRm LEVEL```
 
 Here:
-```RRR``` represents the resolution of the data in meters (e.g., 200). Skip for L1a and L1b,
+```RRR``` represents the resolution of the data in meters (e.g., 200).
 ```LEVEL``` indicates the processing level (described below).
 
 An example directory structure might look like this:
@@ -56,14 +59,23 @@ OSCAR/
 └── Iroise Sea 200x200m L2 MF/
 ```
 Inside each directory, the module expects data files following naming scheme:
-```YYYYMMDD_Track_AA_RRRxRRR_GMF_STATE```
+```YYYYMMDD_Track_AA_OSCAR_RRRxRRR_GMF_STATE.nc```
 
 Where:
 ```YYYYMMDD``` represents the date,
 ```AA``` represents the track number,
-```RRR``` represents the resolution, skip for L1b,
-```GMF``` represents the geophysical model function used for L1c to L2 lmout processing, skip for L1b and L1c,
+```OSCAR``` should be included only for level L1b and L1c,
+```RRR``` represents the resolution (only for level L1c and higher)
+```GMF``` represents the geophysical model function used for L1c to L2 lmout processing (only for level L2 and higher),
 ```STATE``` represents the state of the data (L1b/c for levels L1b/c, lmout for L2 lmout, L2 for L2 and MF for higher).
+
+Example file names:
+```
+L1b: 20220522_Track_1_OSCAR_L1b.nc
+L1c: 20220522_Track_1_OSCAR_200x200m_L1c.nc
+L2 lmout: 20220522_Track_11_200x200m_mouche12_lmout.nc
+L2: 20220522_Track_11_200x200m_mouche12_L2.nc
+```
 #### Recognized Processing Levels
 The following processing levels are supported:
 - L1b/L1c: Data before the inversion
