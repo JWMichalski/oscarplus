@@ -40,8 +40,8 @@ Alternatively, you can directly pass paths as arguments when calling reader func
    - Paths to other datasets are optional but can be added if available.
 #### OSCAR Data Directory Structure
 The directory containing OSCAR data must have subdirectories named according to the following format:
-##### Level L1a & L1b
-```Iroise Sea LEVEL```
+##### Level L1b
+```Iroise Sea L1b```
 ##### Level L1c and higher
 ```Iroise Sea RRRxRRRm LEVEL```
 
@@ -66,7 +66,7 @@ Where:
 ```AA``` represents the track number,
 ```OSCAR``` should be included only for level L1b and L1c,
 ```RRR``` represents the resolution (only for level L1c and higher)
-```GMF``` represents the geophysical model function used for L1c to L2 lmout processing (only for level L2 and higher),
+```GMF``` represents the geophysical model function used for L1c to L2 lmout processing (only for level L2 lmout and higher),
 ```STATE``` represents the state of the data (L1b/c for levels L1b/c, lmout for L2 lmout, L2 for L2 and MF for higher).
 
 Example file names:
