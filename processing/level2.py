@@ -98,6 +98,6 @@ def remove_unreliable_cells(L1c, L2):
     ``xarray.DataSet``
         The L2 dataset with the unreliable cells removed.
     """
-    mask = mask_unreliable_cells(L1c)
+    mask = mask_unreliable_cells(L1c, resolution=L2.attrs["Resolution"])
     L2 = L2.where(~mask)
     return L2
