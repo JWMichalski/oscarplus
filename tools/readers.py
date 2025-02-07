@@ -114,6 +114,11 @@ def read_OSCAR_from_file(
     -------
     DS : ``xarray.DataSet``
         Dataset containing the OSCAR data.
+    Raises
+    ------
+    ValueError
+        If the GMF or resolution attributes are not found and not provided
+        for levels other than L1b and L1c.
     """
     DS = ss.utils.readers.readNetCDFFile(filepath)
 
