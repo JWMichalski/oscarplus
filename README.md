@@ -1,4 +1,6 @@
 # OSCARplus
+[![DOI](https://zenodo.org/badge/899089393.svg)](https://doi.org/10.5281/zenodo.14844299)
+
 Welcome to OSCARplus python module software repository, used for processing of Ocean Surface Current Airborne Radar demonstrator (OSCAR) data, along with Model for Applications at Regional Scale (MARS2D/3D) and bathymetry.
 
 ## 1. Recognized Processing Levels

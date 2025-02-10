@@ -2,7 +2,7 @@
 # Visit https://bit.ly/cffinit to generate yours today!
 
 cff-version: 1.2.0
-title: oscarplus python module
+title: OSCARplus python module
 message: >-
   If you use this software, please cite it using the
   metadata from this file.
@@ -11,5 +11,18 @@ authors:
   - given-names: Jakub W.
     family-names: Michalski
     orcid: 'https://orcid.org/0009-0005-2356-0478'
+    affiliation: >-
+      University of Southampton, National Oceanography
+      Centre UK
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.14844300
 repository-code: 'https://github.com/JWMichalski/oscarplus'
+keywords:
+  - Remote Sensing
+  - Physical Oceanography
+  - OSCAR
+  - SeaSTAR
 license: MIT
+version: v0.1.0
+date-released: '2025-02-10'
