@@ -1,3 +1,19 @@
+"""
+This module contains functions to plot data on a map
+
+Functions
+---------
+quiver_with_background
+    Plots quiver plot with a background of the same data
+single
+    Plots a single data array on a map
+contours
+    Plots a contour plot of a DataArray on a map
+histogram_with_stats
+    Create a histogram of a DataArray
+    Add mean, median, standard deviation, and skewness to the plot
+"""
+
 import numpy as np
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature

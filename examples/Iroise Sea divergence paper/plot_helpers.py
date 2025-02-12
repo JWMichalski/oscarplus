@@ -1,3 +1,22 @@
+"""
+This module contains helper functions for plotting the data.
+
+Functions
+---------
+make_axes
+    Makes axes for the plot
+add_letters
+    Adds letters to the plots for reference
+extract_transect_range
+    Extracts the range of the current transect
+print_ranges
+    Prints the ranges of the current data
+plot_column
+    Plot a column of the transect dataframe on the given axis
+add_arrow
+    Add an arrow to the plot
+"""
+
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 from string import ascii_lowercase

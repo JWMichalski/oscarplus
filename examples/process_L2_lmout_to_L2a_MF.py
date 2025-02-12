@@ -19,10 +19,11 @@ track = "2"
 gmf = "mouche12kp20_rsv20"
 resolution = "200x200m"
 
-# input parameters for spatial AR removal
+# input parameters for simulataneous spatial ambiguity removal removal
 weight = 1.5  # weight (windcurrent ratio) for the wind cost
 iteration_number = 2  # number of passes
 
+# filename base for saving files
 filenamebase = f"{date}_Track_{track}_{resolution}_{gmf}"
 
 ##########
