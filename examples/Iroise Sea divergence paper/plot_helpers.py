@@ -76,14 +76,16 @@ def extract_transect_range(current_transect):
 def print_ranges(DS):
     """Prints the ranges of the current data"""
     print(f"Max velocity: {DS['CurrentVelocity'].max().values}")
-    print(
-        f"Divergence range: {DS['CurrentDivergence'].min().values},"
-        f"{DS['CurrentDivergence'].max().values}"
-    )
-    print(
-        f"Vertical velocity range: {DS['CurrentW'].min().values},"
-        f"{DS['CurrentW'].max().values}"
-    )
+    if "CurrentDivergence" in DS:
+        print(
+            f"Divergence range: {DS['CurrentDivergence'].min().values},"
+            f"{DS['CurrentDivergence'].max().values}"
+        )
+    if "CurrentW" in DS:
+        print(
+            f"Vertical velocity range: {DS['CurrentW'].min().values},"
+            f"{DS['CurrentW'].max().values}"
+        )
 
 
 def plot_column(
