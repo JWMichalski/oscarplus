@@ -254,6 +254,7 @@ def __find_first_last_notnan_latitude_longitude(row):
     first_notnan : ``dict``
         The latitude and longitude of the first non-NaN value.
     """
+
     def find_first_notnan_index(row, reverse=False):
         """ "
         Find the index of the first non-NaN value in a row.
@@ -537,7 +538,7 @@ def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=
             DS_row = DS.isel(GroundRange=iGround, CrossRange=jCross)
             if np.isnan(DS_row["CurrentVelocity"]):
                 break
-            OSCAR = make_OSCAR_dict(DS_row, (i+1) * spacing)
+            OSCAR = make_OSCAR_dict(DS_row, (i + 1) * spacing)
             transectOSCAR.loc[len(transectOSCAR)] = OSCAR
         except Exception:
             break
