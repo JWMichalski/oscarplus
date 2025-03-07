@@ -154,7 +154,7 @@ def build_geo_dataset(L1c, windspeed, winddirection):
     return geo
 
 
-def mask_unreliable_cells(L1c):
+def mask_unreliable_cells(L1c, resolution):
     """
     Create a mask for the cells that are unreliable due to inoptimal incidence angle
     or due to oscillations in mid-beam on the 22.05.2022.
@@ -172,7 +172,6 @@ def mask_unreliable_cells(L1c):
         True for unreliable, False for reliable.
     """
     date = L1c.attrs["DateTaken"]
-    resolution = L1c.attrs["Resolution"]
     if resolution == "200x200m":
         resolution_multiplier = 1
     elif resolution == "100x100m":
