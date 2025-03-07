@@ -6,15 +6,15 @@ This module contains the functions that read the data from the files.
 
 Functions
 ---------
-get_data_dirs : ``dict``
+get_data_dirs :
     Return the directories containing the data
 read_OSCAR : ``xarray.Dataset, string``
     Read the OSCAR data from the given directory
-get_wind_data : ``float, float``
+get_wind_data :
     Load wind data from a CSV file and return the wind direction and velocity
-read_MARS2D : ``xarray.Dataset``
+read_MARS2D :
     Read the MARS2D model data and rename the variables to match the OSCAR data
-read_MARS3D : ``xarray.Dataset``
+read_MARS3D :
     Read the MARS3D model data and rename the variables to match the OSCAR data
 """
 
