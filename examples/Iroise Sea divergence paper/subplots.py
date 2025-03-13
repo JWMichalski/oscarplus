@@ -144,7 +144,7 @@ def quiver_with_background(
         format="%.1f",
         **cbar_kwargs,
     )
-    cbar.set_label(selection + " velocity [$m/s$]")
+    cbar.set_label(selection + " [$m/s$]")
 
     # plot arrows
     L2_arrows.plot.quiver(
