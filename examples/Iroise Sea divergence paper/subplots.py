@@ -144,7 +144,7 @@ def quiver_with_background(
         format="%.1f",
         **cbar_kwargs,
     )
-    cbar.set_label(selection + " velocity [$m/s$]")
+    cbar.set_label(selection + " velocity [$ms^{-1}$]")
 
     # plot arrows
     L2_arrows.plot.quiver(
@@ -293,7 +293,7 @@ def histogram_with_stats(DA, DA_name, ax, **kwargs):
     standard_deviation = DA.std()
 
     # Label x-axis, y-axis, and add title
-    ax.set_xlabel(DA_name)
+    ax.set_xlabel("OSCAR surface current divergence/f")
     ax.set_ylabel("Frequency")
     ax.set_title(f"Histogram of {DA_name}")
 
