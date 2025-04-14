@@ -203,8 +203,8 @@ def single(
             pad=0.075,
             location="right",
         )
-    if cbar_label is not None:
-        cbar.set_label(cbar_label)
+        if cbar_label is not None:
+            cbar.set_label(cbar_label)
     gl = __plot_basics(ax, extent, projection, title, coastlines=coastlines)
     return gl
 
