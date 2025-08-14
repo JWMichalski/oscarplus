@@ -249,6 +249,7 @@ def plot_all_three_on_one(
 def plot_transects(
     current_transects,
     elevation_transects,
+    figsize,
     symmetric_velocity=False,
 ):
     """Plot the transects of the current velocity and the elevation"""
@@ -424,7 +425,7 @@ def plot_transects(
     max_velocity = [2.1, 2.1]
 
     # Create the subplots
-    _, axes = plt.subplots(2, len(current_transects), figsize=(15, 10))
+    _, axes = plt.subplots(2, len(current_transects), figsize=figsize)
     add_letters(axes)
     plt.subplots_adjust(
         left=0.1, right=0.9, top=0.9, bottom=0.1, wspace=0.9, hspace=0.3
@@ -432,15 +433,21 @@ def plot_transects(
 
     # Plot the transects
     for i in range(len(current_transects)):
-        velocity_subplot(
-            current_transects[i], elevation_transects[i], axes[0, i], max_velocity[i]
-        )
-        secondary_subplot(current_transects[i], elevation_transects[i], axes[1, i])
+        if len(current_transects) == 1:
+            velocity_subplot(
+                current_transects[i], elevation_transects[i], axes[0], max_velocity[i]
+            )
+            secondary_subplot(current_transects[i], elevation_transects[i], axes[1])
+        else:
+            velocity_subplot(
+                current_transects[i],
+                elevation_transects[i],
+                axes[0, i],
+                max_velocity[i],
+            )
+            secondary_subplot(current_transects[i], elevation_transects[i], axes[1, i])
 
-    axes[0][0].set_title("Northern jet transect: current velocity")
-    axes[0][1].set_title("Southern jet transect: current velocity")
-    axes[1][0].set_title("Northern jet transect: divergence and vertical current")
-    axes[1][1].set_title("Southern jet transect: divergence and vertical current")
+    return axes
 
 
 def plot_MARS2D_and_MARS3D_profiles(
