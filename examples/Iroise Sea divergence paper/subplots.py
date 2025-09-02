@@ -74,6 +74,7 @@ def quiver_with_background(
     add_max_value_to_ticks=True,
     coastlines=True,
     coarsen_arrows=False,
+    add_cbar=True,
     **kwargs,
 ):
     """
@@ -135,16 +136,17 @@ def quiver_with_background(
     v = selection + "V"
 
     # plot colorbar
-    cbar = plt.colorbar(
-        background,
-        ax=ax,
-        shrink=0.8,
-        pad=0.075,
-        location="right",
-        format="%.1f",
-        **cbar_kwargs,
-    )
-    cbar.set_label(selection + " velocity [$ms^{-1}$]")
+    if add_cbar is True:
+        cbar = plt.colorbar(
+            background,
+            ax=ax,
+            shrink=0.8,
+            pad=0.075,
+            location="right",
+            format="%.1f",
+            **cbar_kwargs,
+        )
+        cbar.set_label(selection + " velocity [$ms^{-1}$]")
 
     # plot arrows
     L2_arrows.plot.quiver(
