@@ -56,10 +56,10 @@ def make_axes(DS, nrows, ncols, figsize, dpi, **kwargs):
     return fig, axes, extent
 
 
-def add_letters(axes):
+def add_letters(axes, y_pos=1.1):
     """Adds letters to the plots for reference"""
     for n, ax in enumerate(axes.flatten()):
-        ax.text(-0.1, 1.1, f"{ascii_lowercase[n]})", transform=ax.transAxes, size=20)
+        ax.text(-0.1, y_pos, f"{ascii_lowercase[n]})", transform=ax.transAxes, size=20)
 
 
 def extract_transect_range(current_transect):
