@@ -11,6 +11,7 @@ bathymetry:/PATH/TO/folder_with_bathymetry
 wind:/PATH/TO/folder_with_wind
 ADCP:/PATH/TO/folder_with_ADCP
 HF radar:/PATH/TO/folder_with_HF_radar
+SWOT:/PATH/TO/folder_with_SWOT
 
 # data folder is optional, not used directly by the module
 data:/PATH/TO/folder_with_all_data_sources
