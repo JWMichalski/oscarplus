@@ -16,10 +16,13 @@ read_MARS2D :
     Read the MARS2D model data and rename the variables to match the OSCAR data
 read_MARS3D :
     Read the MARS3D model data and rename the variables to match the OSCAR data
+read_SWOT :
+    Read the SWOT data and rename the variables to match the OSCAR data
 """
 
 import os
 import warnings
+import glob
 import xarray as xr
 import pandas as pd
 import numpy as np
@@ -403,6 +406,70 @@ def read_MARS3D(filename, resolution, file_path=None):
     MARS3D["CurrentV"] = (("time", "level", "CrossRange", "GroundRange"), current_V)
     MARS3D.attrs["Resolution"] = f"{resolution}x{resolution}m"
     return MARS3D
+
+
+def read_SWOT(level, cycle, pass_number, data_dir=None):
+    """
+    Read the SWOT data.
+
+    Renames the variables to match the OSCAR data.
+    Automatically selects the file based on the provided attributes.
+
+    Parameters
+    ----------
+    level : ``string``
+        Level of the SWOT data (L3_unsmoothed).
+    cycle : ``string``
+        Cycle of the SWOT data (e.g. '001').
+    pass_number : ``string``
+        Pass number of the SWOT data (e.g. '003').
+    data_dir : ``string``, optional
+        Path to the directory containing the SWOT data.
+        If none is given, the data directory is read from data_dir.txt.
+    Returns
+    -------
+    SWOT : ``xarray.DataSet``
+        Dataset containing the SWOT data with the renamed variables.
+    Raises
+    ------
+    ValueError
+        If the level is not 'L3_unsmoothed'.
+    FileNotFoundError
+        If no matching SWOT files are found.
+    RuntimeError
+        If multiple matching SWOT files are found.
+    """
+
+    if data_dir is None:
+        SWOT_data_dir = os.path.join(get_data_dirs()["SWOT"], level)
+    else:
+        SWOT_data_dir = data_dir
+
+    match level:
+        case "L3_unsmoothed":
+            file_pattern = f"SWOT_L3_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
+        case _:
+            raise ValueError("Level must be 'L3_smoothed'")
+
+    file_list = glob.glob(os.path.join(SWOT_data_dir, file_pattern))
+    if len(file_list) == 0:
+        raise FileNotFoundError("No matching SWOT files found.")
+    elif len(file_list) > 1:
+        raise RuntimeError("Multiple matching SWOT files found.")
+
+    file_name = os.path.basename(file_list[0])
+    SWOT = xr.open_dataset(os.path.join(SWOT_data_dir, file_name))
+
+    SWOT["CurrentU"] = SWOT["ugos_filtered"]
+    SWOT["CurrentV"] = SWOT["vgos_filtered"]
+    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+        SWOT["CurrentU"].values, SWOT["CurrentV"].values
+    )
+    SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
+    SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
+    SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
+
+    return SWOT
 
 
 __load_data_dirs()
