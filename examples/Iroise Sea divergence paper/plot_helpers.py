@@ -658,17 +658,17 @@ def plot_MARS2D_and_MARS3D_profiles(
         xlabel="Horizontal current velocity [m/s]",
         ylabel="Depth as fraction of total depth $h$",
     )
-    plot_vertical(
-        bottom_axes[2],
-        MARS3D,
-        "CurrentDirection",
-        title="MARS3D horizontal current direction vs depth",
-        points=points,
-        xlabel="Direction [$°$]",
-        ylabel="Depth as fraction of total depth $h$",
-    )
+    # plot_vertical(
+    #     bottom_axes[2],
+    #     MARS3D,
+    #     "CurrentDirection",
+    #     title="MARS3D horizontal current direction vs depth",
+    #     points=points,
+    #     xlabel="Direction [$°$]",
+    #     ylabel="Depth as fraction of total depth $h$",
+    # )
     bottom_axes[1].set_xlim(0, 3)
-    bottom_axes[2].set_xlim(0, 360)
+    # bottom_axes[2].set_xlim(0, 360)
 
     plt.subplots_adjust(
         left=0.1, right=0.9, top=0.92, bottom=0.1, hspace=0.2, wspace=0.25
