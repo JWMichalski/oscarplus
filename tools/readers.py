@@ -418,7 +418,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Parameters
     ----------
     level : ``string``
-        Level of the SWOT data (L3_unsmoothed).
+        Level of the SWOT data (L3_unsmoothed, L3_expert).
     cycle : ``string``
         Cycle of the SWOT data (e.g. '001').
     pass_number : ``string``
@@ -433,7 +433,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Raises
     ------
     ValueError
-        If the level is not 'L3_unsmoothed'.
+        If the level is not 'L3_unsmoothed, L3_expert'.
     FileNotFoundError
         If no matching SWOT files are found.
     RuntimeError
@@ -448,6 +448,8 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     match level:
         case "L3_unsmoothed":
             file_pattern = f"SWOT_L3_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
+        case "L3_expert":
+            file_pattern = f"SWOT_L3_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
         case _:
             raise ValueError("Level must be 'L3_smoothed'")
 
