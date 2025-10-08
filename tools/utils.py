@@ -13,8 +13,6 @@ Functions
     cut the NaNs from the dataset
 - no_of_NN :
     compute the number of non-NaN nearest neighbours for each cell in the DS dataset
-- get_data_dirs :
-    find the top directory of the data
 - find_track_angle :
     finds the bearing of the airplane
 - attributes_from_filepath :
