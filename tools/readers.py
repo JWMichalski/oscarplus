@@ -451,7 +451,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
         case "L3_expert":
             file_pattern = f"SWOT_L3_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
         case _:
-            raise ValueError("Level must be 'L3_smoothed'")
+            raise ValueError("Level must be 'L3_unsmoothed' or 'L3_expert'")
 
     file_list = glob.glob(os.path.join(SWOT_data_dir, file_pattern))
     if len(file_list) == 0:
