@@ -418,7 +418,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Parameters
     ----------
     level : ``string``
-        Level of the SWOT data (L3_unsmoothed, L3_expert).
+        Level of the SWOT data ('L3_unsmoothed', 'L3_expert', 'L2_expert').
     cycle : ``string``
         Cycle of the SWOT data (e.g. '001').
     pass_number : ``string``
@@ -433,7 +433,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Raises
     ------
     ValueError
-        If the level is not 'L3_unsmoothed, L3_expert'.
+        If the level is not 'L3_unsmoothed', 'L3_expert', or 'L2_expert'.
     FileNotFoundError
         If no matching SWOT files are found.
     RuntimeError
@@ -450,8 +450,12 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             file_pattern = f"SWOT_L3_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
         case "L3_expert":
             file_pattern = f"SWOT_L3_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
+        case "L2_expert":
+            file_pattern = f"SWOT_L2_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
         case _:
-            raise ValueError("Level must be 'L3_unsmoothed' or 'L3_expert'")
+            raise ValueError(
+                "Level must be 'L3_unsmoothed', 'L3_expert', or 'L2_expert'"
+            )
 
     file_list = glob.glob(os.path.join(SWOT_data_dir, file_pattern))
     if len(file_list) == 0:
@@ -462,15 +466,23 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     file_name = os.path.basename(file_list[0])
     SWOT = xr.open_dataset(os.path.join(SWOT_data_dir, file_name))
 
-    SWOT["CurrentU"] = SWOT["ugos_filtered"]
-    SWOT["CurrentV"] = SWOT["vgos_filtered"]
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
-        SWOT["CurrentU"].values, SWOT["CurrentV"].values
-    )
-    SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
-    SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
+    # handle L3-specific naming and provide fallbacks for missing variables
+    if level.startswith("L3"):
+        # ensure required variables are present
+        if "ugos_filtered" not in SWOT or "vgos_filtered" not in SWOT:
+            missing = [n for n in ("ugos_filtered", "vgos_filtered") if n not in SWOT]
+            raise KeyError(f"Missing required SWOT variables: {missing}")
+        SWOT["CurrentU"] = SWOT["ugos_filtered"]
+        SWOT["CurrentV"] = SWOT["vgos_filtered"]
+        cvel, cdir = ss.utils.tools.currentUV2VelDir(
+            SWOT["CurrentU"].values, SWOT["CurrentV"].values
+        )
+        SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
+        SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
+    elif level.startswith("L2"):
+        SWOT["WindVelocity"] = SWOT["wind_speed_karin"]
+        pass
     SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
-
     return SWOT
 
 
