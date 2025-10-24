@@ -50,7 +50,7 @@ def set_resolution(DS, resolution):
     DS : ``xarray.DataSet``
         Dataset to set the resolution of.
     resolution : ``int``
-        Resolution to add to the dataset to in meters.
+        Resolution to add to the dataset in meters.
     """
     DS.attrs["Resolution"] = f"{resolution}x{resolution}m"
 
