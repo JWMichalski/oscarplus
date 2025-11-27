@@ -268,88 +268,89 @@ def plot_transects(
         max_el = df_el["elevation"].max()
         ax.set_ylim(max_el, 0)
 
-    def velocity_subplot(df_current, df_elevation, ax, max_velocity):
-        """Plot the velocity and elevation on the given axis"""
-        # make more axis
-        ax1 = ax
-        ax_velocity = ax1.twinx()  # velocity full
-        ax3 = ax1.twinx()  # velocity along
-        ax4 = ax1.twinx()  # velocity across
-        subaxes = [ax3, ax4]
+    # def velocity_subplot(df_current, df_elevation, ax, max_velocity):
+    #     """Plot the velocity and elevation on the given axis"""
+    #     # make more axis
+    #     ax1 = ax
+    #     ax_velocity = ax1.twinx()  # velocity full
+    #     ax3 = ax1.twinx()  # velocity along
+    #     ax4 = ax1.twinx()  # velocity across
+    #     subaxes = [ax3, ax4]
 
-        # configure spines to avoid overlap
-        starting_distance = 40
-        for iax in subaxes:
-            # Shift the spine outward from the right
-            iax.spines["right"].set_position(("outward", starting_distance))
-            iax.spines["right"].set_visible(False)  # Hide the default right spine
-            iax.set_yticklabels([])
-            iax.set_yticks([])
-            starting_distance += 10
+    #     # configure spines to avoid overlap
+    #     starting_distance = 40
+    #     for iax in subaxes:
+    #         # Shift the spine outward from the right
+    #         iax.spines["right"].set_position(("outward", starting_distance))
+    #         iax.spines["right"].set_visible(False)  # Hide the default right spine
+    #         iax.set_yticklabels([])
+    #         iax.set_yticks([])
+    #         starting_distance += 10
 
-        # plot elevation
-        ax1.invert_yaxis()
-        ax1.set_xlabel("Distance [m]")
-        plot_column(
-            "elevation",
-            ax1,
-            depth_col,
-            "Depth [$m$]",
-            df=df_elevation,
-            alpha=0.3,
-        )
-        ax1.fill_between(
-            df_elevation["distance"],
-            ax1.get_ylim()[0],
-            df_elevation["elevation"],
-            color=depth_col,
-            alpha=0.3,
-        )
-        set_elevation_axis_limits(ax1, df_elevation)
+    #     # plot elevation
+    #     ax1.invert_yaxis()
+    #     ax1.set_xlabel("Distance [m]")
+    #     plot_column(
+    #         "elevation",
+    #         ax1,
+    #         depth_col,
+    #         "Depth [$m$]",
+    #         df=df_elevation,
+    #         alpha=0.3,
+    #     )
+    #     ax1.fill_between(
+    #         df_elevation["distance"],
+    #         ax1.get_ylim()[0],
+    #         df_elevation["elevation"],
+    #         color=depth_col,
+    #         alpha=0.3,
+    #     )
+    #     set_elevation_axis_limits(ax1, df_elevation)
 
-        # Plot CurrentVelocity
-        plot_column(
-            "CurrentVelocity",
-            ax_velocity,
-            "blue",
-            df=df_current,
-            label="|Horizontal surface velocity| [$ms^{-1}$]",
-        )
-        ax_velocity.tick_params(axis="y", labelcolor="black")
-        ax_velocity.set_ylim(bottom=0, top=max_velocity)
+    #     # Plot CurrentVelocity
+    #     plot_column(
+    #         "CurrentVelocity",
+    #         ax_velocity,
+    #         "blue",
+    #         df=df_current,
+    #         label="|Horizontal surface velocity| [$ms^{-1}$]",
+    #     )
+    #     ax_velocity.tick_params(axis="y", labelcolor="black")
+    #     ax_velocity.set_ylim(bottom=0, top=max_velocity)
 
-        # Plot CurrentVelocity_along_transect
-        plot_column(
-            "CurrentVelocity_along_transect",
-            ax3,
-            velocity_along_col,
-            df=df_current,
-            label="|Horizontal surface velocity along transect| [$ms^{-1}$]",
-            abs_val=True,
-        )
-        ax3.set_ylim(ax_velocity.get_ylim())
+    #     # Plot CurrentVelocity_along_transect
+    #     plot_column(
+    #         "CurrentVelocity_along_transect",
+    #         ax3,
+    #         velocity_along_col,
+    #         df=df_current,
+    #         label="|Horizontal surface velocity along transect| [$ms^{-1}$]",
+    #         abs_val=True,
+    #     )
+    #     ax3.set_ylim(ax_velocity.get_ylim())
 
-        # Plot CurrentVelocity_across_transect
-        plot_column(
-            "CurrentVelocity_across_transect",
-            ax4,
-            "xkcd:light blue",
-            "|Horizontal surface velocity across transect| [$ms^{-1}$]",
-            df=df_current,
-            abs_val=True,
-        )
-        ax4.set_ylim(ax_velocity.get_ylim())
+    #     # Plot CurrentVelocity_across_transect
+    #     plot_column(
+    #         "CurrentVelocity_across_transect",
+    #         ax4,
+    #         "xkcd:light blue",
+    #         "|Horizontal surface velocity across transect| [$ms^{-1}$]",
+    #         df=df_current,
+    #         abs_val=True,
+    #     )
+    #     ax4.set_ylim(ax_velocity.get_ylim())
 
-        ax1.set_xlim(0, df_current["distance"].max())
-        for ax in subaxes:
-            ax.set_xlim(0, df_current["distance"].max())
+    #     ax1.set_xlim(0, df_current["distance"].max())
+    #     for ax in subaxes:
+    #         ax.set_xlim(0, df_current["distance"].max())
 
-    def secondary_subplot(df_current, df_elevation, ax):
+    def subplot(df_current, df_elevation, ax):
         # Make more y-axis
         ax1 = ax
         ax2 = ax1.twinx()
         ax3 = ax1.twinx()
         ax4 = ax1.twinx()
+        # ax_velocity = ax1.twinx()
 
         # Now configure all axis
         ax3.spines["left"].set_position(
@@ -359,6 +360,22 @@ def plot_transects(
         ax4.spines["right"].set_position(
             ("outward", 60)
         )  # Hide the default right spine
+
+        # plot total velocity
+        # plot_column(
+        #     "CurrentVelocity",
+        #     ax_velocity,
+        #     "blue",
+        #     df=df_current,
+        #     label="Horizontal surface velocity [$ms^{-1}$]",
+        #     abs_val=False,
+        # )
+        # # ax_velocity.tick_params(axis="y", labelcolor="black")
+        # ax_velocity.set_ylim(bottom=0, top=2.1)
+        # ax_velocity.spines["left"].set_position(("outward", 10))
+        # ax_velocity.spines["left"].set_visible(False)  # Hide the default right spine
+        # ax_velocity.set_yticklabels([])
+        # ax_velocity.set_yticks([])
 
         # plot elevation
         ax1.invert_yaxis()
@@ -422,30 +439,26 @@ def plot_transects(
     depth_col = "#FFC107"
     velocity_along_col = "#1E88E5"
     CurrentW_style = "dotted"
-    max_velocity = [2.1, 2.1]
 
     # Create the subplots
-    _, axes = plt.subplots(2, len(current_transects), figsize=figsize)
+    _, axes = plt.subplots(1, len(current_transects), figsize=figsize)
     add_letters(axes)
-    plt.subplots_adjust(
-        left=0.1, right=0.9, top=0.9, bottom=0.1, wspace=0.9, hspace=0.3
-    )
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1, wspace=1, hspace=0.3)
 
     # Plot the transects
     for i in range(len(current_transects)):
         if len(current_transects) == 1:
-            velocity_subplot(
-                current_transects[i], elevation_transects[i], axes[0], max_velocity[i]
-            )
-            secondary_subplot(current_transects[i], elevation_transects[i], axes[1])
-        else:
-            velocity_subplot(
+            subplot(
                 current_transects[i],
                 elevation_transects[i],
-                axes[0, i],
-                max_velocity[i],
+                axes,
             )
-            secondary_subplot(current_transects[i], elevation_transects[i], axes[1, i])
+        else:
+            subplot(
+                current_transects[i],
+                elevation_transects[i],
+                axes[i],
+            )
 
     return axes
 
