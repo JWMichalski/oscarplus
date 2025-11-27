@@ -13,8 +13,6 @@ Functions
     cut the NaNs from the dataset
 - no_of_NN :
     compute the number of non-NaN nearest neighbours for each cell in the DS dataset
-- get_data_dirs :
-    find the top directory of the data
 - find_track_angle :
     finds the bearing of the airplane
 - attributes_from_filepath :
@@ -52,7 +50,7 @@ def set_resolution(DS, resolution):
     DS : ``xarray.DataSet``
         Dataset to set the resolution of.
     resolution : ``int``
-        Resolution to add to the dataset to in meters.
+        Resolution to add to the dataset in meters.
     """
     DS.attrs["Resolution"] = f"{resolution}x{resolution}m"
 
@@ -85,7 +83,8 @@ def get_resolution(DS):
         or "m" not in DS.attrs["Resolution"]
     ):
         raise ValueError(
-            "Resolution attribute must be a string in the form '<int>x<int>m'"
+            "Resolution attribute is invalid:"
+            "it should be a string in the form '<int>x<int>m'"
         )
     resolution_WIP = DS.attrs["Resolution"][:-1].split("x")
     if (
@@ -93,7 +92,9 @@ def get_resolution(DS):
         or not resolution_WIP[0].isdigit()
         or not resolution_WIP[1].isdigit()
     ):
-        raise ValueError("Resolution must be in the form '<int>x<int>m'")
+        raise ValueError(
+            "Resolution attribute is invalid: itmust be in the form '<int>x<int>m'"
+        )
     resolution = int(resolution_WIP[0])
     if int(resolution_WIP[1]) != resolution:
         raise ValueError("Resolution must be the same in both dimensions")
@@ -127,8 +128,6 @@ def no_of_NN(DA):
     """
     This function computes the number of non-NaN nearest neighbours
     for each cell in the DS dataset
-
-    Works in place, adds a new data variable 'NoOfNearestNeighbours' to the DS dataset.
 
     Parameters
     ----------
@@ -624,7 +623,8 @@ def transect(DS, bathymetry, iGround, jCross, angle, max_length=1000, handiness=
 
 def align_with_track(DS):
     """
-    Rotate the components of the dataset to align with the track
+    Rotates in place the CurrentU, CurrentV, EarthRelativeWindU and EarthRelativeWindV
+    DataArrays in the dataset to align with the track
 
     Parameters
     ----------

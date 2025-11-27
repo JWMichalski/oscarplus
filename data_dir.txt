@@ -7,10 +7,14 @@
 OSCAR:/PATH/TO/folder_with_OSCAR
 MARS2D:/PATH/TO/folder_with_MARS2D
 MARS3D:/PATH/TO/folder_with_MARS3D
+SWOT:/PATH/TO/folder_with_SWOT
 bathymetry:/PATH/TO/folder_with_bathymetry
 wind:/PATH/TO/folder_with_wind
+
+# ground sources
 ADCP:/PATH/TO/folder_with_ADCP
 HF radar:/PATH/TO/folder_with_HF_radar
+drifters:/PATH/TO/folder_with_drifters
 
 # data folder is optional, not used directly by the module
 data:/PATH/TO/folder_with_all_data_sources
