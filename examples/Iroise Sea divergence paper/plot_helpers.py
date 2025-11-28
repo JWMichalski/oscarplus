@@ -442,7 +442,8 @@ def plot_transects(
 
     # Create the subplots
     _, axes = plt.subplots(1, len(current_transects), figsize=figsize)
-    add_letters(axes)
+    if len(current_transects) > 1:
+        add_letters(axes)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1, wspace=1, hspace=0.3)
 
     # Plot the transects
@@ -611,15 +612,6 @@ def plot_MARS2D_and_MARS3D_profiles(
             markersize=7,
             transform=ax.projection,
         )
-    for i in range(2):
-        top_axes[0].plot(
-            MARS3D["longitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
-            MARS3D["latitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
-            marker="*",
-            color="white",
-            markersize=7,
-            transform=ax.projection,
-        )
 
     bottom_axes[0].text(
         MARS3D["longitude"].isel(GroundRange=points[0][0], CrossRange=points[0][1])
@@ -632,26 +624,6 @@ def plot_MARS2D_and_MARS3D_profiles(
         transform=ax.projection,
     )
     bottom_axes[0].text(
-        MARS3D["longitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
-        - 0.00175,
-        MARS3D["latitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
-        + 0.0035,
-        "B",
-        fontsize=10,
-        color="white",
-        transform=ax.projection,
-    )
-    top_axes[0].text(
-        MARS3D["longitude"].isel(GroundRange=points[0][0], CrossRange=points[0][1])
-        - 0.002,
-        MARS3D["latitude"].isel(GroundRange=points[0][0], CrossRange=points[0][1])
-        + 0.0035,
-        "A",
-        fontsize=10,
-        color="white",
-        transform=ax.projection,
-    )
-    top_axes[0].text(
         MARS3D["longitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
         - 0.00175,
         MARS3D["latitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
@@ -688,5 +660,117 @@ def plot_MARS2D_and_MARS3D_profiles(
     )
     axes = np.concatenate((top_axes, bottom_axes))
     add_letters(axes)
+
+    return axes
+
+
+def MARS2D_through_time(
+    MARS2Ds,
+    bathymetry,
+    figsize,
+    extent,
+    legend_location="upper right",
+):
+    _, axes = plt.subplots(
+        2,
+        3,
+        subplot_kw={"projection": ccrs.PlateCarree()},
+        gridspec_kw={"wspace": 0.2, "hspace": 0.007},
+        figsize=figsize,
+        dpi=300,
+        constrained_layout=True,
+    )
+
+    depth = -bathymetry["elevation"]
+
+    # TOP ROW
+    cmaps = ["YlGn", Bathymetrycmap]
+
+    gl_upper = []
+    gl_lower = []
+
+    for i in range(2):
+        # Plot current
+        gl_u = splot.quiver_with_background(
+            MARS2Ds[i],
+            ax=axes[0, i],
+            selection="Current",
+            title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
+            extent=extent,
+            coarsen_arrows=True,
+            vmax=3.2,
+            add_cbar=False,
+        )
+        gl_upper.append(gl_u)
+        # Plot divergence
+        gl_l = splot.single(
+            MARS2Ds[i]["CurrentDivergence"],
+            ax=axes[1, i],
+            extent=extent,
+            title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
+            cbar_label="Divergence/f",
+            vmax=20,
+            add_cbar=False,
+        )
+        gl_lower.append(gl_l)
+
+    # Plot current
+    gl_upper.append(
+        splot.quiver_with_background(
+            MARS2Ds[2],
+            ax=axes[0, 2],
+            selection="Current",
+            title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
+            extent=extent,
+            coarsen_arrows=True,
+            vmax=3.2,
+        )
+    )
+    # Plot divergence
+    gl_lower.append(
+        splot.single(
+            MARS2Ds[2]["CurrentDivergence"],
+            ax=axes[1, 2],
+            extent=extent,
+            title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
+            cbar_label="Divergence/f",
+            vmax=20,
+        )
+    )
+
+    # Plot bathymetry
+    for i in range(2):
+        for j in range(3):
+            splot.contours(
+                depth,
+                ax=axes[i, j],
+                extent=extent,
+                vmin=40,
+                vmax=120,
+                level_step=20,
+                legend_title="Elevation",
+                linewidths=0.8,
+                legend_location=legend_location,
+                cmap=cmaps[i],
+            )
+    for gl in gl_upper:
+        gl.bottom_labels = False
+    for i in range(1, 3):
+        gl_upper[i].left_labels = False
+        gl_lower[i].left_labels = False
+    plt.subplots_adjust(
+        left=0.1, right=0.9, top=0.92, bottom=0.1, hspace=0.3, wspace=0.05
+    )
+    add_letters(axes, y_pos=1.07)
+
+    for i in range(3):
+        axes[0, i].set_title(
+            f"Current at {str(MARS2Ds[i].time.dt.strftime('%H:%M').values)}",
+            fontsize=12,
+        )
+        axes[1, i].set_title(
+            f"Divergence at {str(MARS2Ds[i].time.dt.strftime('%H:%M').values)}",
+            fontsize=12,
+        )
 
     return axes
