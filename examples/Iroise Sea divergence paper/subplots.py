@@ -258,7 +258,7 @@ def contours(
     )
 
 
-def histogram_with_stats(DA, DA_name, ax, **kwargs):
+def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
     """
     Create a histogram of a DataArray
     Add mean, median, standard deviation, and skewness to the plot
@@ -295,7 +295,7 @@ def histogram_with_stats(DA, DA_name, ax, **kwargs):
     standard_deviation = DA.std()
 
     # Label x-axis, y-axis, and add title
-    ax.set_xlabel("OSCAR surface current divergence/f")
+    ax.set_xlabel(f"OSCAR surface current {variable}/f")
     ax.set_ylabel("Frequency")
     ax.set_title(f"Histogram of {DA_name}")
 
