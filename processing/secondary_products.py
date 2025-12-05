@@ -99,8 +99,8 @@ def calculate_secondary_products(DS, resolution=None):
 
     calculate_secondary_product_div_by_f("Divergence")
     calculate_secondary_product_div_by_f("Curl")
-    calculate_secondary_product("ShearRate")
-    calculate_secondary_product("StrainRate")
+    calculate_secondary_product_div_by_f("ShearRate")
+    calculate_secondary_product_div_by_f("StrainRate")
     calculate_secondary_product("KineticEnergyDensity")
     calculate_secondary_product("Enstrophy")
 
