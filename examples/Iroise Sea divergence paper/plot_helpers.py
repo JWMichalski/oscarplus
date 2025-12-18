@@ -24,6 +24,7 @@ import numpy as np
 from string import ascii_lowercase
 from matplotlib.patches import FancyArrowPatch
 from matplotlib.colors import LinearSegmentedColormap
+from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
 
 def __calculate_extent(DS, xoffset=0, yoffset=0):
@@ -60,6 +61,41 @@ def add_letters(axes, y_pos=1.1):
     """Adds letters to the plots for reference"""
     for n, ax in enumerate(axes.flatten()):
         ax.text(-0.1, y_pos, f"{ascii_lowercase[n]})", transform=ax.transAxes, size=20)
+
+
+def add_track_shape(OSCAR, ax, sel_for_cutting, color="red", alpha=0.3, linewidth=1):
+    """
+    Adds the track shape to the plot
+
+    Parameters
+    ----------
+    OSCAR : ``xarray.dataset``
+        L2a MF data
+    ax : ``matplotlib.axes``
+        axes to plot on
+    sel_for_cutting : ``string``
+        string with the selected datavariable for cutting the track
+    color : ``string``, optional
+        color of the track shape
+        Default is red
+    alpha : ``float``, optional
+        transparency of the track shape
+        Default is 0.3
+    """
+    DA_no_nan = cut_NaNs(OSCAR.copy(deep=True), sel_for_cutting)
+    track_corners = find_six_track_corners(DA_no_nan[sel_for_cutting])
+    polygon = [[corner["longitude"], corner["latitude"]] for corner in track_corners]
+    ax.add_patch(
+        plt.Polygon(
+            polygon,
+            closed=True,
+            fill=None,
+            edgecolor=color,
+            linewidth=linewidth,
+            alpha=alpha,
+        )
+    )
+
 
 
 def extract_transect_range(current_transect):
