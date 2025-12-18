@@ -295,7 +295,7 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
     standard_deviation = DA.std()
 
     # Label x-axis, y-axis, and add title
-    ax.set_xlabel(f"OSCAR surface current {variable}/f")
+    ax.set_xlabel(f"OSCAR surface current {variable.lower()}/f")
     ax.set_ylabel("Frequency")
     ax.set_title(f"Histogram of {DA_name}")
 
