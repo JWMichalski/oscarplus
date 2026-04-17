@@ -287,7 +287,20 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
         hist_kwargs["bins"] = bins
 
     # Plot the histogram
-    ax.hist(flat_DA, histtype="bar", density=True, **hist_kwargs)
+    # ax.hist(flat_DA, histtype="step", linewidth=3, density=True, **hist_kwargs)
+
+    counts, bin_edges = np.histogram(flat_DA, density=True, **hist_kwargs)
+
+    # replace 0s with nans to avoid plotting lines at y=0
+    display_counts = np.array(counts, copy=True)
+    display_counts[display_counts == 0] = np.nan
+
+    # We append the last value to display_counts so the line reaches the final bin edge
+    # 'where=post' mimics the behavior of histtype='step'
+    ax.step(bin_edges, np.append(display_counts, display_counts[-1]),
+            where='post', linewidth=2.5)
+
+    ax.set_ylim(0, None)
 
     mean_value = DA.mean()
     median_value = DA.median()
@@ -298,19 +311,32 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
     ax.set_xlabel(f"OSCAR surface current {variable.lower()}/f")
     ax.set_ylabel("Frequency")
     ax.set_title(f"Histogram of {DA_name}")
-
+    if "line_colours" in kwargs:
+        line_colours = kwargs["line_colours"]
+    else:
+        line_colours = {"mean": "r", "median": "y"}
     # Add mean and median lines
-    ax.axvline(mean_value, color="r", linestyle="--", label=f"Mean: {mean_value:.2f}")
     ax.axvline(
-        median_value, color="y", linestyle="--", label=f"Median: {median_value:.2f}"
+        mean_value, color=line_colours["mean"],
+        linestyle="--", label=f"Mean: {mean_value:.2f}",
+        alpha=0.5,
+    )
+    ax.axvline(
+        median_value, color=line_colours["median"],
+        linestyle=":", label=f"Median: {median_value:.2f}",
+        alpha=0.5,
     )
 
     ax.plot([], [], " ")
     ax.plot([], [], " ")
 
     # Add legend with mean, median, standard deviation, and skewness
+    if "legend_loc" in kwargs:
+        legend_loc = kwargs["legend_loc"]
+    else:
+        legend_loc = "upper right"
     ax.legend(
-        loc="upper right",
+        loc=legend_loc,
         fontsize="small",
         labels=[
             f"Mean: {mean_value:.2f}",
