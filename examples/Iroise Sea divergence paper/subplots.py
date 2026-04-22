@@ -269,6 +269,17 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
     flat_DA = DA.values.flatten()
 
     hist_kwargs = {}
+    if "xlim" in kwargs:
+        if isinstance(pts := kwargs["xlim"], (float, int)):
+            x_min, x_max = -pts, pts
+        elif isinstance(pts, (list, tuple)) and len(pts) == 2:
+            x_min, x_max = pts
+        else:
+            raise ValueError("xlim must be a number or a list of length 2")
+    else:
+        # If no xlim is provided, use the data range
+        x_min, x_max = np.nanmin(flat_DA), np.nanmax(flat_DA)
+
     if "bin_number" in kwargs:
         hist_kwargs["bins"] = kwargs["bin_number"]
     elif "bin_width" in kwargs:
@@ -276,48 +287,39 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
             (
                 np.arange(
                     0,
-                    np.nanmin(flat_DA) - kwargs["bin_width"],
+                    x_min - kwargs["bin_width"],
                     -kwargs["bin_width"],
-                )[::-1][:-1],
-                np.arange(
-                    0, np.nanmax(flat_DA) + kwargs["bin_width"], kwargs["bin_width"]
-                ),
+                )[
+                    ::-1
+                ][:-1],
+                np.arange(0, x_max + kwargs["bin_width"], kwargs["bin_width"]),
             )
         )
         hist_kwargs["bins"] = bins
+
     if "linestyle" in kwargs:
         linestyle = kwargs["linestyle"]
     else:
         linestyle = "-"
-
-    # Plot the histogram
-    # ax.hist(flat_DA, histtype="step", linewidth=3, density=True, **hist_kwargs)
 
     if "line_alpha" in kwargs:
         line_alpha = kwargs["line_alpha"]
     else:
         line_alpha = 0.75
 
-    counts, bin_edges = np.histogram(flat_DA, density=True, **hist_kwargs)
+    linewidth = kwargs.get("linewidth", 2.5)
 
-    # replace 0s with nans to avoid plotting lines at y=0
-    display_counts = np.array(counts, copy=True)
-    display_counts[display_counts == 0] = np.nan
-    if "zorder" in kwargs:
-        step_kwargs = {"zorder": kwargs["zorder"]}
-    else:
-        step_kwargs = {}
-
-    # append the last value to display_counts so the line reaches the final bin edge
-    ax.step(
-        bin_edges,
-        np.append(display_counts, display_counts[-1]),
-        where="post",
-        linewidth=2.5,
+    # Plot the histogram
+    ax.hist(
+        flat_DA,
+        histtype="step",
+        linewidth=linewidth,
         alpha=line_alpha,
-        color=color,
+        density=True,
         linestyle=linestyle,
-        **step_kwargs,
+        color=color,
+        zorder=kwargs.get("zorder"),
+        **hist_kwargs,
     )
 
     ax.set_ylim(-0.0075, None)
@@ -367,7 +369,7 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
         [],
         [],
         color=legend_color,
-        linewidth=2.5,
+        linewidth=linewidth,
         alpha=line_alpha,
         label=legend_label,
         linestyle=linestyle,
