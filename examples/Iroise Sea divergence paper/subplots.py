@@ -258,7 +258,7 @@ def contours(
     )
 
 
-def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
+def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs):
     """
     Create a histogram of a DataArray
     Add mean, median, standard deviation, and skewness to the plot
@@ -285,22 +285,42 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
             )
         )
         hist_kwargs["bins"] = bins
+    if "linestyle" in kwargs:
+        linestyle = kwargs["linestyle"]
+    else:
+        linestyle = "-"
 
     # Plot the histogram
     # ax.hist(flat_DA, histtype="step", linewidth=3, density=True, **hist_kwargs)
+
+    if "line_alpha" in kwargs:
+        line_alpha = kwargs["line_alpha"]
+    else:
+        line_alpha = 0.75
 
     counts, bin_edges = np.histogram(flat_DA, density=True, **hist_kwargs)
 
     # replace 0s with nans to avoid plotting lines at y=0
     display_counts = np.array(counts, copy=True)
     display_counts[display_counts == 0] = np.nan
+    if "zorder" in kwargs:
+        step_kwargs = {"zorder": kwargs["zorder"]}
+    else:
+        step_kwargs = {}
 
-    # We append the last value to display_counts so the line reaches the final bin edge
-    # 'where=post' mimics the behavior of histtype='step'
-    ax.step(bin_edges, np.append(display_counts, display_counts[-1]),
-            where='post', linewidth=2.5)
+    # append the last value to display_counts so the line reaches the final bin edge
+    ax.step(
+        bin_edges,
+        np.append(display_counts, display_counts[-1]),
+        where="post",
+        linewidth=2.5,
+        alpha=line_alpha,
+        color=color,
+        linestyle=linestyle,
+        **step_kwargs,
+    )
 
-    ax.set_ylim(0, None)
+    ax.set_ylim(-0.0075, None)
 
     mean_value = DA.mean()
     median_value = DA.median()
@@ -311,48 +331,28 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
     ax.set_xlabel(f"OSCAR surface current {variable.lower()}/f")
     ax.set_ylabel("Frequency")
     ax.set_title(f"Histogram of {DA_name}")
-    if "line_colours" in kwargs:
-        line_colours = kwargs["line_colours"]
-    else:
-        line_colours = {"mean": "r", "median": "y"}
-    # Add mean and median lines
-    ax.axvline(
-        mean_value, color=line_colours["mean"],
-        linestyle="--", label=f"Mean: {mean_value:.2f}",
-        alpha=0.5,
-    )
-    ax.axvline(
-        median_value, color=line_colours["median"],
-        linestyle=":", label=f"Median: {median_value:.2f}",
-        alpha=0.5,
-    )
 
     ax.plot([], [], " ")
     ax.plot([], [], " ")
 
-    # Add legend with mean, median, standard deviation, and skewness
-    if "legend_loc" in kwargs:
-        legend_loc = kwargs["legend_loc"]
-    else:
-        legend_loc = "upper right"
-    ax.legend(
-        loc=legend_loc,
-        fontsize="small",
-        labels=[
-            f"Mean: {mean_value:.2f}",
-            f"Median: {median_value:.2f}",
-            f"std: {standard_deviation:.2f}",
-            f"Skewness: {skewness:.2f}",
-        ],
-    )
+    ax.axhline(0, color="black", linestyle="--", linewidth=0.5, alpha=0.75)
+
+    def add_x0_line():
+        ax.axvline(0, color="black", linestyle="--", linewidth=0.5, alpha=0.75)
 
     if "xlim" in kwargs:
         if isinstance(kwargs["xlim"], Number):
             ax.set_xlim(-kwargs["xlim"], kwargs["xlim"])
+            if kwargs["xlim"] != 0:
+                add_x0_line()
         elif len(kwargs["xlim"]) == 2:
             ax.set_xlim(kwargs["xlim"])
+            if kwargs["xlim"][0] != 0:
+                add_x0_line()
         else:
             raise ValueError("xlim must be a number or a list of length 2")
+    else:
+        add_x0_line()
     if "ylim" in kwargs:
         if isinstance(kwargs["ylim"], Number):
             ax.set_ylim(0, kwargs["ylim"])
@@ -360,3 +360,26 @@ def histogram_with_stats(DA, DA_name, ax, variable, **kwargs):
             ax.set_ylim(kwargs["ylim"])
         else:
             raise ValueError("ylim must be a list of length 1 or 2")
+
+    legend_label = kwargs.get("legend_label", DA_name)
+    legend_color = kwargs.get("legend_color", color)
+    ax.plot(
+        [],
+        [],
+        color=legend_color,
+        linewidth=2.5,
+        alpha=line_alpha,
+        label=legend_label,
+        linestyle=linestyle,
+    )
+
+    stats = {
+        "mean": float(mean_value),
+        "median": float(median_value),
+        "std_dev": float(standard_deviation),
+        "skewness": float(skewness),
+    }
+
+    ylim = ax.get_ylim()[1]
+
+    return stats, ylim
