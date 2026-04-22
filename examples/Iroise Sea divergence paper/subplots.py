@@ -341,7 +341,7 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
         ax.axvline(0, color="black", linestyle="--", linewidth=0.5, alpha=0.75)
 
     if "xlim" in kwargs:
-        if isinstance(kwargs["xlim"], Number):
+        if isinstance(kwargs["xlim"], float) or isinstance(kwargs["xlim"], int):
             ax.set_xlim(-kwargs["xlim"], kwargs["xlim"])
             if kwargs["xlim"] != 0:
                 add_x0_line()
