@@ -523,11 +523,17 @@ def plot_MARS2D_and_MARS3D_profiles(
             s=3,
             label="Point B",
         )
+        ax.scatter(
+            DS[da_name].isel(GroundRange=points[2][0], CrossRange=points[2][1]),
+            -DS.isel(GroundRange=points[2][0], CrossRange=points[2][1])["level"],
+            s=3,
+            label="Point C",
+        )
         ax.invert_yaxis()
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         ax.set_title(title)
-        ax.legend(loc="lower left")
+        ax.legend(loc="best")
 
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(2, 3)
@@ -539,7 +545,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         top_axes[i] = fig.add_subplot(gs[0, i], projection=ccrs.PlateCarree())
 
     bottom_axes[0] = fig.add_subplot(gs[1, 0], projection=ccrs.PlateCarree())
-    bottom_axes[1] = fig.add_subplot(gs[1, 1])
+    bottom_axes[1] = fig.add_subplot(gs[1, 1], projection=ccrs.PlateCarree())
     bottom_axes[2] = fig.add_subplot(gs[1, 2])
 
     extent = [
@@ -551,7 +557,6 @@ def plot_MARS2D_and_MARS3D_profiles(
 
     depth = -bathymetry["elevation"]
 
-    # TOP ROW
     cmaps = ["YlGn", Bathymetrycmap, Bathymetrycmap]
 
     # Plot bathymetry
@@ -613,19 +618,20 @@ def plot_MARS2D_and_MARS3D_profiles(
         "headlength": 5,
     }
 
-    # Plot bathymetry
-    splot.contours(
-        depth,
-        ax=bottom_axes[0],
-        extent=extent,
-        vmin=40,
-        vmax=120,
-        level_step=20,
-        legend_title="Elevation",
-        linewidths=0.8,
-        legend_location=legend_location,
-        cmap="YlGn",
-    )
+    for ax, cmap in zip(bottom_axes[0:1], cmaps[0:1]):
+        # Plot bathymetry
+        splot.contours(
+            depth,
+            ax=ax,
+            extent=extent,
+            vmin=40,
+            vmax=120,
+            level_step=20,
+            legend_title="Elevation",
+            linewidths=0.8,
+            legend_location=legend_location,
+            cmap=cmap,
+        )
 
     # Plot current
     splot.quiver_with_background(
@@ -638,14 +644,13 @@ def plot_MARS2D_and_MARS3D_profiles(
         **quiver_kwargs,
     )
 
-    for i in range(2):
+    for i in range(3):
         bottom_axes[0].plot(
             MARS3D["longitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
             MARS3D["latitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
             marker="*",
             color="white",
             markersize=7,
-            transform=ax.projection,
         )
 
     bottom_axes[0].text(
@@ -656,7 +661,6 @@ def plot_MARS2D_and_MARS3D_profiles(
         "A",
         fontsize=10,
         color="white",
-        transform=ax.projection,
     )
     bottom_axes[0].text(
         MARS3D["longitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
@@ -666,11 +670,28 @@ def plot_MARS2D_and_MARS3D_profiles(
         "B",
         fontsize=10,
         color="white",
-        transform=ax.projection,
+    )
+    bottom_axes[0].text(
+        MARS3D["longitude"].isel(GroundRange=points[2][0], CrossRange=points[2][1])
+        - 0.00175,
+        MARS3D["latitude"].isel(GroundRange=points[2][0], CrossRange=points[2][1])
+        + 0.0035,
+        "C",
+        fontsize=10,
+        color="white",
+    )
+
+    splot.single(
+        MARS3D["CurrentDivergence"].sel(level=levels[0]),
+        ax=bottom_axes[1],
+        extent=extent,
+        title="MARS3D surface current divergence",
+        cbar_label="Divergence/f",
+        vmax=20,
     )
 
     plot_vertical(
-        bottom_axes[1],
+        bottom_axes[2],
         MARS3D,
         "CurrentVelocity",
         title="MARS3D horizontal current velocity vs depth",
@@ -678,7 +699,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         xlabel="Horizontal current velocity [m/s]",
         ylabel="Depth as fraction of total depth $h$",
     )
-    bottom_axes[1].set_xlim(0, 3)
+    bottom_axes[2].set_xlim(0, 3)
 
     plt.subplots_adjust(
         left=0.1, right=0.9, top=0.92, bottom=0.1, hspace=0.2, wspace=0.25
