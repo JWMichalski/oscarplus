@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import subplots as splot
 import numpy as np
 from string import ascii_lowercase
-from matplotlib.patches import FancyArrowPatch
+from matplotlib.patches import FancyArrowPatch, Polygon
 from matplotlib.colors import LinearSegmentedColormap
 from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
@@ -86,7 +86,7 @@ def add_track_shape(OSCAR, ax, sel_for_cutting, color="red", alpha=0.3, linewidt
     track_corners = find_six_track_corners(DA_no_nan[sel_for_cutting])
     polygon = [[corner["longitude"], corner["latitude"]] for corner in track_corners]
     ax.add_patch(
-        plt.Polygon(
+        Polygon(
             polygon,
             closed=True,
             fill=None,
@@ -538,8 +538,8 @@ def plot_MARS2D_and_MARS3D_profiles(
     fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(2, 3)
 
-    top_axes = [None, None, None]
-    bottom_axes = [None, None, None]
+    top_axes = np.array([None, None, None])
+    bottom_axes = np.array([None, None, None])
 
     for i in range(3):
         top_axes[i] = fig.add_subplot(gs[0, i], projection=ccrs.PlateCarree())
