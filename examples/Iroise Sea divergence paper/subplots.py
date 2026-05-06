@@ -218,7 +218,6 @@ def contours(
     vmax,
     vmin=0,
     level_step=50,
-    cmap="Greens_r",
     legend_title=None,
     legend_location="upper right",
     **kwargs,
@@ -234,7 +233,6 @@ def contours(
         vmin=vmin,
         vmax=vmax,
         ax=ax,
-        cmap=cmap,
         **kwargs,
     )
     # Manually set the axis limits to match the extent
@@ -297,16 +295,8 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
         )
         hist_kwargs["bins"] = bins
 
-    if "linestyle" in kwargs:
-        linestyle = kwargs["linestyle"]
-    else:
-        linestyle = "-"
-
-    if "line_alpha" in kwargs:
-        line_alpha = kwargs["line_alpha"]
-    else:
-        line_alpha = 0.75
-
+    linestyle = kwargs.get("linestyle", "-")
+    line_alpha = kwargs.get("line_alpha", 0.75)
     linewidth = kwargs.get("linewidth", 2.5)
 
     # Plot the histogram

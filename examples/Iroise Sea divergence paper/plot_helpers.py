@@ -27,6 +27,17 @@ from matplotlib.colors import LinearSegmentedColormap
 from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
 
+# Colourmap used for bathymetry on the secondary product plots
+Bathymetrycmap = LinearSegmentedColormap.from_list(
+    "Bathymetrycmap",
+    [
+        [0.0, "#777777"],
+        [0.5, "#444444"],
+        [1.0, "#000000"],
+    ],
+)
+
+
 def __calculate_extent(DS, xoffset=0, yoffset=0):
     """Calculates the extent of the plot based on the dataset and the offset"""
     extent = [
@@ -190,19 +201,6 @@ def add_arrow(ax, lon1, lat1, lon2, lat2, color, **kwargs):
     ax.add_patch(arrow)
 
 
-# Functions
-
-# Colourmap used for bathymetry on the secondary product plots
-Bathymetrycmap = LinearSegmentedColormap.from_list(
-    "Bathymetrycmap",
-    [
-        [0.0, "#777777"],
-        [0.5, "#444444"],
-        [1.0, "#000000"],
-    ],
-)
-
-
 def plot_all_three_on_one(
     DS,
     bathymetry,
@@ -303,82 +301,6 @@ def plot_transects(
         max_el = df_el["elevation"].max()
         ax.set_ylim(max_el, 0)
 
-    # def velocity_subplot(df_current, df_elevation, ax, max_velocity):
-    #     """Plot the velocity and elevation on the given axis"""
-    #     # make more axis
-    #     ax1 = ax
-    #     ax_velocity = ax1.twinx()  # velocity full
-    #     ax3 = ax1.twinx()  # velocity along
-    #     ax4 = ax1.twinx()  # velocity across
-    #     subaxes = [ax3, ax4]
-
-    #     # configure spines to avoid overlap
-    #     starting_distance = 40
-    #     for iax in subaxes:
-    #         # Shift the spine outward from the right
-    #         iax.spines["right"].set_position(("outward", starting_distance))
-    #         iax.spines["right"].set_visible(False)  # Hide the default right spine
-    #         iax.set_yticklabels([])
-    #         iax.set_yticks([])
-    #         starting_distance += 10
-
-    #     # plot elevation
-    #     ax1.invert_yaxis()
-    #     ax1.set_xlabel("Distance [m]")
-    #     plot_column(
-    #         "elevation",
-    #         ax1,
-    #         depth_col,
-    #         "Depth [$m$]",
-    #         df=df_elevation,
-    #         alpha=0.3,
-    #     )
-    #     ax1.fill_between(
-    #         df_elevation["distance"],
-    #         ax1.get_ylim()[0],
-    #         df_elevation["elevation"],
-    #         color=depth_col,
-    #         alpha=0.3,
-    #     )
-    #     set_elevation_axis_limits(ax1, df_elevation)
-
-    #     # Plot CurrentVelocity
-    #     plot_column(
-    #         "CurrentVelocity",
-    #         ax_velocity,
-    #         "blue",
-    #         df=df_current,
-    #         label="|Horizontal surface velocity| [$ms^{-1}$]",
-    #     )
-    #     ax_velocity.tick_params(axis="y", labelcolor="black")
-    #     ax_velocity.set_ylim(bottom=0, top=max_velocity)
-
-    #     # Plot CurrentVelocity_along_transect
-    #     plot_column(
-    #         "CurrentVelocity_along_transect",
-    #         ax3,
-    #         velocity_along_col,
-    #         df=df_current,
-    #         label="|Horizontal surface velocity along transect| [$ms^{-1}$]",
-    #         abs_val=True,
-    #     )
-    #     ax3.set_ylim(ax_velocity.get_ylim())
-
-    #     # Plot CurrentVelocity_across_transect
-    #     plot_column(
-    #         "CurrentVelocity_across_transect",
-    #         ax4,
-    #         "xkcd:light blue",
-    #         "|Horizontal surface velocity across transect| [$ms^{-1}$]",
-    #         df=df_current,
-    #         abs_val=True,
-    #     )
-    #     ax4.set_ylim(ax_velocity.get_ylim())
-
-    #     ax1.set_xlim(0, df_current["distance"].max())
-    #     for ax in subaxes:
-    #         ax.set_xlim(0, df_current["distance"].max())
-
     def subplot(df_current, df_elevation, ax):
         # Make more y-axis
         ax1 = ax
@@ -395,22 +317,6 @@ def plot_transects(
         ax4.spines["right"].set_position(
             ("outward", 60)
         )  # Hide the default right spine
-
-        # plot total velocity
-        # plot_column(
-        #     "CurrentVelocity",
-        #     ax_velocity,
-        #     "blue",
-        #     df=df_current,
-        #     label="Horizontal surface velocity [$ms^{-1}$]",
-        #     abs_val=False,
-        # )
-        # # ax_velocity.tick_params(axis="y", labelcolor="black")
-        # ax_velocity.set_ylim(bottom=0, top=2.1)
-        # ax_velocity.spines["left"].set_position(("outward", 10))
-        # ax_velocity.spines["left"].set_visible(False)  # Hide the default right spine
-        # ax_velocity.set_yticklabels([])
-        # ax_velocity.set_yticks([])
 
         # plot elevation
         ax1.invert_yaxis()
@@ -455,6 +361,7 @@ def plot_transects(
         ax3.yaxis.set_ticks_position("left")
         if symmetric_velocity:
             make_axes_lim_symmetric(ax3)
+
         # Plot CurrentW
         plot_column(
             "CurrentW",
@@ -818,5 +725,79 @@ def MARS2D_through_time(
             f"Divergence at {str(MARS2Ds[i].time.dt.strftime('%H:%M').values)}",
             fontsize=12,
         )
+
+    return axes
+
+
+def OSCAR_MARS_side_by_side(
+    OSCAR,
+    MARS,
+    variable,
+    bathymetry,
+    figsize,
+    extent,
+    legend_location="upper right",
+    xoffset=0,
+    yoffset=0,
+    vmax=20,
+):
+    """Plot the current, divergence and vertical current on the same figure"""
+    _, axes, _ = make_axes(
+        MARS,
+        1,
+        2,
+        figsize=figsize,
+        dpi=300,
+        title=None,
+        xoffset=xoffset,
+        yoffset=yoffset,
+    )
+
+    depth = -bathymetry["elevation"]
+
+    # cmaps = ["YlGn", Bathymetrycmap, Bathymetrycmap]
+
+    variable_name = variable.replace(" ", "")
+    variable = variable.lower()
+
+    # Plot bathymetry
+    for ax in axes:
+        splot.contours(
+            depth,
+            ax=ax,
+            extent=extent,
+            vmin=40,
+            vmax=120,
+            level_step=20,
+            legend_title="Elevation",
+            linewidths=0.8,
+            legend_location=legend_location,
+            cmap=Bathymetrycmap,
+        )
+
+    # Plot divergence
+    _ = splot.single(
+        OSCAR[f"Current{variable_name}"],
+        ax=axes[0],
+        extent=extent,
+        title=f"OSCAR surface current {variable}",
+        cbar_label=f"{variable}/f",
+        vmax=vmax,
+    )
+    # Plot vertical current
+    gl2 = splot.single(
+        MARS[f"Current{variable_name}"],
+        ax=axes[1],
+        extent=extent,
+        title=f"MARS2D surface current {variable}",
+        cbar_label=f"{variable}/f",
+        vmax=vmax,
+    )
+
+    # Remove left labels from the right plot
+    gl2.left_labels = False
+
+    add_letters(axes)
+    plt.subplots_adjust(wspace=0.05)
 
     return axes
