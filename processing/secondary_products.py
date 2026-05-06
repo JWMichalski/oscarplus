@@ -59,23 +59,21 @@ def calculate_secondary_products(DS, resolution=None):
         If None, DS must contain the Resolution attribute formatted as "YYYxYYYm".
     """
     def calculate_secondary_product(product):
+        if resolution is None or resolution == 0:
+            raise ValueError("Resolution cannot be 0 or None")
         # Calculate the divergence
         if "CurrentU_rot" in DS:
-            DS[f"Current{product}"] = (
-                calc.wrap_numpy_2D_vector_calc(
-                    DS["CurrentU_rot"], DS["CurrentV_rot"], product
-                )
-                / resolution
+            DS[f"Current{product}"] = calc.wrap_numpy_2D_vector_calc(
+                DS["CurrentU_rot"], DS["CurrentV_rot"], product
+            ) / float(
+                resolution
             )  # Divide by resolution to convert to 1/s
         if "EarthRelativeWindU_rot" in DS:
-            DS[f"EarthRelativeWind{product}"] = (
-                calc.wrap_numpy_2D_vector_calc(
-                    DS["EarthRelativeWindU_rot"],
-                    DS["EarthRelativeWindV_rot"],
-                    product,
-                )
-                / resolution
-            )
+            DS[f"EarthRelativeWind{product}"] = calc.wrap_numpy_2D_vector_calc(
+                DS["EarthRelativeWindU_rot"],
+                DS["EarthRelativeWindV_rot"],
+                product,
+            ) / float(resolution)
 
     def calculate_secondary_product_div_by_f(product):
         calculate_secondary_product(product)
