@@ -759,6 +759,8 @@ def OSCAR_MARS_side_by_side(
 
     variable_name = variable.replace(" ", "")
     variable = variable.lower()
+    if variable == "curl":
+        variable = "vorticity"
 
     # Plot bathymetry
     for ax in axes:
@@ -792,6 +794,15 @@ def OSCAR_MARS_side_by_side(
         title=f"MARS2D surface current {variable}",
         cbar_label=f"{variable}/f",
         vmax=vmax,
+    )
+
+    add_track_shape(
+        OSCAR,
+        axes[1],
+        sel_for_cutting="CurrentVelocity",
+        color="black",
+        alpha=0.75,
+        linewidth=2,
     )
 
     # Remove left labels from the right plot
