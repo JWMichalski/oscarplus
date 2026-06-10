@@ -418,7 +418,8 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Parameters
     ----------
     level : ``string``
-        Level of the SWOT data ('L3_unsmoothed', 'L3_expert', 'L2_expert').
+        Level of the SWOT data
+        ('L3_unsmoothed', 'L3_expert', 'L2_unsmoothed', 'L2_expert').
     cycle : ``string``
         Cycle of the SWOT data (e.g. '001').
     pass_number : ``string``
@@ -450,11 +451,14 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             file_pattern = f"SWOT_L3_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
         case "L3_expert":
             file_pattern = f"SWOT_L3_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
+        case "L2_unsmoothed":
+            file_pattern = f"SWOT_L2_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
         case "L2_expert":
             file_pattern = f"SWOT_L2_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
         case _:
             raise ValueError(
-                "Level must be 'L3_unsmoothed', 'L3_expert', or 'L2_expert'"
+                "Level must be 'L3_unsmoothed', 'L3_expert',"
+                "'L2_unsmoothed', or 'L2_expert'"
             )
 
     file_list = glob.glob(os.path.join(SWOT_data_dir, file_pattern))
@@ -479,7 +483,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
         )
         SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
         SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
-    elif level.startswith("L2"):
+    elif level == "L2_expert":
         SWOT["WindVelocity"] = SWOT["wind_speed_karin"]
         pass
     SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
