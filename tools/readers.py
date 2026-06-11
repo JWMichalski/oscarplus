@@ -516,7 +516,9 @@ def read_mitgcm(filename, z_layer, file_path=None):
         # THIS IS A HACK TO GET THE MITGCM DATA DIR WITHOUT ADDING IT TO DATA_DIR.TXT
         # ASSUMES THE MITGCM DATA DIR IS IN THE SAME DIR AS THE MARS2D DATA DIR
         # IT WILL BE FIXED WHEN THE MITGCM DATA DIR IS ADDED TO DATA_DIR.TXT
-        file_path = os.path.join(os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm")
+        file_path = os.path.join(
+            os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm", filename
+            )
     else:
         file_path = os.path.join(file_path, filename)
 
