@@ -18,6 +18,8 @@ read_MARS3D :
     Read the MARS3D model data and rename the variables to match the OSCAR data
 read_SWOT :
     Read the SWOT data and rename the variables to match the OSCAR data
+read_mitgcm :
+    Read the MITgcm model data and rename the variables to match the OSCAR data
 """
 
 import os
@@ -488,6 +490,51 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
         pass
     SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
     return SWOT
+
+
+def read_mitgcm(filename, z_layer, file_path=None):
+    """
+    Reads one layer of the MITgcm model data from the given directory
+
+    Renames the variables to match the OSCAR data.
+
+    Parameters
+    ----------
+    filename : ``string``
+        Name of the file containing the MITgcm model data.
+    z_layer : ``int``
+        The z layer to select from the MITgcm data.
+    file_path : ``string``, optional
+        Path to the file containing the MITgcm model data.
+        If none is given, the data directory is selected from data_dir.txt.
+    Returns
+    -------
+    mitgcm : ``xarray.DataSet``
+        Dataset containing the MITgcm model data with the renamed variables.
+    """
+    if file_path is None:
+        # THIS IS A HACK TO GET THE MITGCM DATA DIR WITHOUT ADDING IT TO DATA_DIR.TXT
+        # ASSUMES THE MITGCM DATA DIR IS IN THE SAME DIR AS THE MARS2D DATA DIR
+        # IT WILL BE FIXED WHEN THE MITGCM DATA DIR IS ADDED TO DATA_DIR.TXT
+        file_path = os.path.join(os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm")
+    else:
+        file_path = os.path.join(file_path, filename)
+
+    mitgcm = xr.open_mfdataset(file_path)  # change path to select a different file
+
+    mitgcm = mitgcm.rename(
+        {"y": "CrossRange", "x": "GroundRange", "XC": "longitude", "YC": "latitude"}
+    )
+
+    mitgcm = mitgcm.isel(z=z_layer)
+
+    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+        mitgcm["U"].values, mitgcm["V"].values
+    )  # converts u and v components to velocity and direction
+    mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)
+    mitgcm["CurrentDirection"] = (("time", "CrossRange", "GroundRange"), cdir)
+    mitgcm = mitgcm.rename({"U": "CurrentU", "V": "CurrentV"})
+    return mitgcm
 
 
 __load_data_dirs()
