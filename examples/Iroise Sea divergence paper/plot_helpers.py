@@ -223,7 +223,7 @@ def plot_all_three_on_one(
 
     depth = -bathymetry["elevation"]
 
-    cmaps = ["YlGn", Bathymetrycmap, Bathymetrycmap]
+    cmaps = [Bathymetrycmap, Bathymetrycmap, Bathymetrycmap]
 
     # Plot bathymetry
     for ax, cmap in zip(axes, cmaps):
@@ -249,6 +249,8 @@ def plot_all_three_on_one(
         extent=extent,
         coarsen_arrows=True,
         vmax=3.2,
+        cmap="YlOrRd_r",
+        minlength=1,
     )
     # Plot divergence
     gl2 = splot.single(
