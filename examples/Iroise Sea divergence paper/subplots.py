@@ -155,7 +155,7 @@ def quiver_with_background(
         u=u,
         v=v,
         pivot="mid",
-        zorder=2,
+        zorder=4,
         ax=ax,
         add_guide=False,
         **kwargs,
