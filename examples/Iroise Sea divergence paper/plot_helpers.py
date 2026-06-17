@@ -28,12 +28,21 @@ from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
 
 # Colourmap used for bathymetry on the secondary product plots
+# Bathymetrycmap = LinearSegmentedColormap.from_list(
+#     "Bathymetrycmap",
+#     [
+#         [0.0, "#777777"],
+#         [0.5, "#444444"],
+#         [1.0, "#000000"],
+#     ],
+# )
+
 Bathymetrycmap = LinearSegmentedColormap.from_list(
     "Bathymetrycmap",
     [
-        [0.0, "#777777"],
-        [0.5, "#444444"],
-        [1.0, "#000000"],
+        [0.0, "#ADD0E6"],
+        [0.5, "#3C8CC3"],
+        [1.0, "#08316C"],
     ],
 )
 
@@ -208,6 +217,9 @@ def plot_all_three_on_one(
     legend_location="upper right",
     xoffset=0,
     yoffset=0,
+    current_cmap="YlOrRd",
+    arrow_color="black",
+    **kwargs,
 ):
     """Plot the current, divergence and vertical current on the same figure"""
     _, axes, extent = make_axes(
@@ -220,6 +232,9 @@ def plot_all_three_on_one(
         xoffset=xoffset,
         yoffset=yoffset,
     )
+
+    if "extent" in kwargs:
+        extent = kwargs["extent"]
 
     depth = -bathymetry["elevation"]
 
@@ -238,6 +253,7 @@ def plot_all_three_on_one(
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
+            zorder=2,
         )
 
     # Plot current
@@ -249,8 +265,10 @@ def plot_all_three_on_one(
         extent=extent,
         coarsen_arrows=True,
         vmax=3.2,
-        cmap="YlOrRd_r",
+        cmap=current_cmap,
         minlength=1,
+        color=arrow_color,
+        linewidth=3,
     )
     # Plot divergence
     gl2 = splot.single(
@@ -418,6 +436,7 @@ def plot_MARS2D_and_MARS3D_profiles(
     legend_location="upper right",
     xoffset=0,
     yoffset=0,
+    current_cmap="default",
 ):
     def plot_vertical(ax, DS, da_name, title, points, xlabel, ylabel):
         ax.scatter(
@@ -492,6 +511,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         extent=extent,
         coarsen_arrows=True,
         vmax=3.2,
+        cmap=current_cmap,
     )
     # Plot divergence
     gl2 = splot.single(
@@ -550,6 +570,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         title=f"MARS3D current at depth of {-levels[0]}$h$",
         extent=extent,
         coarsen_arrows=False,
+        cmap=current_cmap,
         **quiver_kwargs,
     )
 
