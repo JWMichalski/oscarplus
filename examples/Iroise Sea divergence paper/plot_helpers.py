@@ -37,12 +37,21 @@ from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 #     ],
 # )
 
-Bathymetrycmap = LinearSegmentedColormap.from_list(
-    "Bathymetrycmap",
+Bathymetrycmap_blue = LinearSegmentedColormap.from_list(
+    "Bathymetrycmap_blue",
     [
         [0.0, "#ADD0E6"],
         [0.5, "#3C8CC3"],
         [1.0, "#08316C"],
+    ],
+)
+
+Bathymetrycmap_orange = LinearSegmentedColormap.from_list(
+    "Bathymetrycmap_orange",
+    [
+        [0.0, "#FDB97E"],
+        [0.5, "#E75B0B"],
+        [1.0, "#802703"],
     ],
 )
 
@@ -83,7 +92,9 @@ def add_letters(axes, y_pos=1.1):
         ax.text(-0.1, y_pos, f"{ascii_lowercase[n]})", transform=ax.transAxes, size=20)
 
 
-def add_track_shape(OSCAR, ax, sel_for_cutting, color="red", alpha=0.3, linewidth=1):
+def add_track_shape(
+    OSCAR, ax, sel_for_cutting, color="red", alpha=0.3, linewidth=1, zorder=10
+):
     """
     Adds the track shape to the plot
 
@@ -238,7 +249,7 @@ def plot_all_three_on_one(
 
     depth = -bathymetry["elevation"]
 
-    cmaps = [Bathymetrycmap, Bathymetrycmap, Bathymetrycmap]
+    cmaps = [Bathymetrycmap_blue, Bathymetrycmap_orange, Bathymetrycmap_orange]
 
     # Plot bathymetry
     for ax, cmap in zip(axes, cmaps):
@@ -256,6 +267,9 @@ def plot_all_three_on_one(
             zorder=2,
         )
 
+    quiver_kwargs = {}
+    if "arrow_scale" in kwargs:
+        quiver_kwargs["scale"] = kwargs["arrow_scale"]
     # Plot current
     splot.quiver_with_background(
         DS,
@@ -269,6 +283,7 @@ def plot_all_three_on_one(
         minlength=1,
         color=arrow_color,
         linewidth=3,
+        **quiver_kwargs,
     )
     # Plot divergence
     gl2 = splot.single(
@@ -437,6 +452,7 @@ def plot_MARS2D_and_MARS3D_profiles(
     xoffset=0,
     yoffset=0,
     current_cmap="default",
+    **kwargs,
 ):
     def plot_vertical(ax, DS, da_name, title, points, xlabel, ylabel):
         ax.scatter(
@@ -485,7 +501,7 @@ def plot_MARS2D_and_MARS3D_profiles(
 
     depth = -bathymetry["elevation"]
 
-    cmaps = ["YlGn", Bathymetrycmap, Bathymetrycmap]
+    cmaps = [Bathymetrycmap_blue, Bathymetrycmap_orange, Bathymetrycmap_orange]
 
     # Plot bathymetry
     for ax, cmap in zip(top_axes, cmaps):
@@ -500,7 +516,12 @@ def plot_MARS2D_and_MARS3D_profiles(
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
+            zorder=2,
         )
+
+    quiver_kwargs = {}
+    if "arrow_scale" in kwargs:
+        quiver_kwargs["scale"] = kwargs["arrow_scale"]
 
     # Plot current
     gl1 = splot.quiver_with_background(
@@ -512,6 +533,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         coarsen_arrows=True,
         vmax=3.2,
         cmap=current_cmap,
+        **quiver_kwargs,
     )
     # Plot divergence
     gl2 = splot.single(
@@ -521,6 +543,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         title="MARS2D surface current divergence",
         cbar_label="Divergence/f",
         vmax=20,
+        zorder=0,
     )
     # Plot vertical current
     gl3 = splot.single(
@@ -530,6 +553,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         title="MARS2D vertical surface current",
         cbar_label="Current velocity [$ms^{-1}$]",
         vmax=0.2,
+        zorder=0,
     )
 
     # Remove left labels from the middle and right plot
@@ -560,6 +584,7 @@ def plot_MARS2D_and_MARS3D_profiles(
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
+            zorder=2,
         )
 
     # Plot current
@@ -581,6 +606,7 @@ def plot_MARS2D_and_MARS3D_profiles(
             marker="*",
             color="white",
             markersize=7,
+            zorder=30,
         )
 
     bottom_axes[0].text(
@@ -591,6 +617,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         "A",
         fontsize=10,
         color="white",
+        zorder=30,
     )
     bottom_axes[0].text(
         MARS3D["longitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
@@ -600,6 +627,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         "B",
         fontsize=10,
         color="white",
+        zorder=30,
     )
     bottom_axes[0].text(
         MARS3D["longitude"].isel(GroundRange=points[2][0], CrossRange=points[2][1])
@@ -609,6 +637,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         "C",
         fontsize=10,
         color="white",
+        zorder=30,
     )
 
     splot.single(
@@ -618,6 +647,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         title="MARS3D surface current divergence",
         cbar_label="Divergence/f",
         vmax=20,
+        zorder=0,
     )
 
     plot_vertical(
@@ -660,7 +690,7 @@ def MARS2D_through_time(
     depth = -bathymetry["elevation"]
 
     # TOP ROW
-    cmaps = ["YlGn", Bathymetrycmap]
+    cmaps = ["YlGn", Bathymetrycmap_blue]
 
     gl_upper = []
     gl_lower = []
@@ -797,7 +827,7 @@ def OSCAR_MARS_side_by_side(
             legend_title="Elevation",
             linewidths=0.8,
             legend_location=legend_location,
-            cmap=Bathymetrycmap,
+            cmap=Bathymetrycmap_blue,
         )
 
     # Plot divergence
