@@ -21,7 +21,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import subplots as splot
 import numpy as np
-from string import ascii_lowercase
+from string import ascii_uppercase
 from matplotlib.patches import FancyArrowPatch, Polygon
 from matplotlib.colors import LinearSegmentedColormap
 from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
@@ -89,7 +89,7 @@ def make_axes(DS, nrows, ncols, figsize, dpi, **kwargs):
 def add_letters(axes, y_pos=1.1):
     """Adds letters to the plots for reference"""
     for n, ax in enumerate(axes.flatten()):
-        ax.text(-0.1, y_pos, f"{ascii_lowercase[n]})", transform=ax.transAxes, size=20)
+        ax.text(-0.1, y_pos, f"({ascii_uppercase[n]})", transform=ax.transAxes, size=20)
 
 
 def add_track_shape(
@@ -467,12 +467,6 @@ def plot_MARS2D_and_MARS3D_profiles(
             s=3,
             label="Point B",
         )
-        ax.scatter(
-            DS[da_name].isel(GroundRange=points[2][0], CrossRange=points[2][1]),
-            -DS.isel(GroundRange=points[2][0], CrossRange=points[2][1])["level"],
-            s=3,
-            label="Point C",
-        )
         ax.invert_yaxis()
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -599,7 +593,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         **quiver_kwargs,
     )
 
-    for i in range(3):
+    for i in range(len(points)):
         bottom_axes[0].plot(
             MARS3D["longitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
             MARS3D["latitude"].isel(GroundRange=points[i][0], CrossRange=points[i][1]),
@@ -625,16 +619,6 @@ def plot_MARS2D_and_MARS3D_profiles(
         MARS3D["latitude"].isel(GroundRange=points[1][0], CrossRange=points[1][1])
         + 0.0035,
         "B",
-        fontsize=10,
-        color="white",
-        zorder=30,
-    )
-    bottom_axes[0].text(
-        MARS3D["longitude"].isel(GroundRange=points[2][0], CrossRange=points[2][1])
-        - 0.00175,
-        MARS3D["latitude"].isel(GroundRange=points[2][0], CrossRange=points[2][1])
-        + 0.0035,
-        "C",
         fontsize=10,
         color="white",
         zorder=30,
