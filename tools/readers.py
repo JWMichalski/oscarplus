@@ -29,6 +29,7 @@ import xarray as xr
 import pandas as pd
 import numpy as np
 import seastar as ss
+from warnings import warn
 
 
 __data_dirs = {}
@@ -38,7 +39,7 @@ def __load_data_dirs():
     """
     Load the directories containing the OSCAR data
     """
-    global __data_dirs
+    # global __data_dirs
     data_dir_file_loc = os.path.dirname(os.path.dirname(__file__))
     with open(os.path.join(data_dir_file_loc, "data_dir.txt"), "r") as file:
         for line in file:
@@ -488,7 +489,15 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     elif level == "L2_expert":
         SWOT["WindVelocity"] = SWOT["wind_speed_karin"]
         pass
-    SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
+    if "num_lines" in SWOT.dims and "num_pixels" in SWOT.dims:
+        SWOT = SWOT.rename_dims(
+            {"num_lines": "CrossRange", "num_pixels": "GroundRange"}
+        )
+    else:
+        warn("SWOT dataset does not contain expected dimensions 'num_lines'"
+             "and 'num_pixels'."
+             "This may lead to issues with dimension names."
+             "CrossRange and GroundRange might be missing.")
     return SWOT
 
 
@@ -518,7 +527,7 @@ def read_mitgcm(filename, z_layer, file_path=None):
         # IT WILL BE FIXED WHEN THE MITGCM DATA DIR IS ADDED TO DATA_DIR.TXT
         file_path = os.path.join(
             os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm", filename
-            )
+        )
     else:
         file_path = os.path.join(file_path, filename)
 
