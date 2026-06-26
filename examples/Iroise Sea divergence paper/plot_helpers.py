@@ -849,3 +849,81 @@ def OSCAR_MARS_side_by_side(
     plt.subplots_adjust(wspace=0.05)
 
     return axes
+
+
+def compare_OSCAR_MARS2D_secondary(
+    OSCAR,
+    model,
+    bathymetry,
+    figsize,
+    vmax,
+    secondary_product_sel,
+    xoffset=0,
+    yoffset=0,
+):
+    if secondary_product_sel == "Curl":
+        display_name = "Vorticity"
+    elif secondary_product_sel == "ShearRate":
+        display_name = "Shear Rate"
+    else:
+        display_name = secondary_product_sel
+
+    _, axes, extent = make_axes(
+        model,
+        1,
+        2,
+        figsize=figsize,
+        dpi=300,
+        title=None,
+        xoffset=xoffset,
+        yoffset=yoffset,
+    )
+
+    depth = -bathymetry["elevation"]
+    for ax in axes:
+        splot.contours(
+            depth,
+            ax=ax,
+            extent=extent,
+            vmin=40,
+            vmax=120,
+            level_step=20,
+            legend_title="Elevation",
+            linewidths=0.8,
+            legend_location="upper left",
+            cmap=Bathymetrycmap_orange,
+            zorder=2,
+        )
+
+    _ = splot.single(
+        OSCAR["Current" + secondary_product_sel],
+        ax=axes[0],
+        title=f"OSCAR current {display_name}",
+        extent=extent,
+        cbar_label=f"Current {display_name}/f",
+        robust=False,
+        vmax=vmax,
+    )
+
+    gl_right = splot.single(
+        model["Current" + secondary_product_sel],
+        ax=axes[1],
+        title=f"MARS2D current {display_name}",
+        extent=extent,
+        cbar_label=f"Current {display_name}/f",
+        robust=False,
+        vmax=vmax,
+    )
+
+    gl_right.left_labels = False
+
+    add_track_shape(
+        OSCAR,
+        axes[1],
+        sel_for_cutting="CurrentVelocity",
+        color="black",
+        alpha=0.75,
+        linewidth=2,
+        zorder=20,
+    )
+    return axes
