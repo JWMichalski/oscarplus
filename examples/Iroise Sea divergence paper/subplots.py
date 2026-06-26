@@ -192,11 +192,6 @@ def single(
         **kwargs,
     )
 
-    if title is not None:
-        ax.set_title(title)  # adds subfigure title
-    if extent is not None:
-        ax.set_extent(extent)
-    # plot colorbar
     if add_cbar:
         cbar = plt.colorbar(
             single_plot,
@@ -208,6 +203,7 @@ def single(
         if cbar_label is not None:
             cbar.set_label(cbar_label)
     gl = __plot_basics(ax, extent, projection, title, coastlines=coastlines)
+
     return gl
 
 
