@@ -28,9 +28,9 @@ import glob
 import xarray as xr
 import pandas as pd
 import numpy as np
-import seastar as ss
 from warnings import warn
-
+from seastar.utils.readers import readNetCDFFile
+from seastar.utils import tools as ss_tools
 
 __data_dirs = {}
 
@@ -126,7 +126,11 @@ def read_OSCAR_from_file(
         If the GMF or resolution attributes are not found and not provided
         for levels other than L1b and L1c.
     """
-    DS = ss.utils.readers.readNetCDFFile(filepath)
+
+    DS = readNetCDFFile(filepath)
+
+    if DS is None:
+        raise ValueError(f"Could not read OSCAR data from {filepath}")
 
     # add atributes to the dataset
     if "DateTaken" not in DS.attrs:
@@ -353,13 +357,13 @@ def read_MARS2D(filename, resolution, file_path=None):
 
     MARS2D = xr.open_mfdataset(file_path)  # change path to select a different file
     # add current velocity and direction
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = ss_tools.currentUV2VelDir(
         MARS2D["U"].values, MARS2D["V"].values
     )  # converts u and v components to velocity and direction
     MARS2D["CurrentVelocity"] = (("time", "nj", "ni"), cvel)
     MARS2D["CurrentDirection"] = (("time", "nj", "ni"), cdir)
     MARS2D = MARS2D.rename({"ni": "GroundRange", "nj": "CrossRange"})
-    current_U, current_V = ss.utils.tools.currentVelDir2UV(
+    current_U, current_V = ss_tools.currentVelDir2UV(
         MARS2D["CurrentVelocity"].values, MARS2D["CurrentDirection"].values
     )  # converts velocity and direction to u and v components
     MARS2D["CurrentU"] = (("time", "CrossRange", "GroundRange"), current_U)
@@ -396,13 +400,13 @@ def read_MARS3D(filename, resolution, file_path=None):
 
     MARS3D = xr.open_mfdataset(file_path)  # change path to select a different file
     # add current velocity and direction
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = ss_tools.currentUV2VelDir(
         MARS3D["UZ"].values, MARS3D["VZ"].values
     )  # converts u and v components to velocity and direction
     MARS3D["CurrentVelocity"] = (("time", "level", "nj", "ni"), cvel)
     MARS3D["CurrentDirection"] = (("time", "level", "nj", "ni"), cdir)
     MARS3D = MARS3D.rename({"ni": "GroundRange", "nj": "CrossRange"})
-    current_U, current_V = ss.utils.tools.currentVelDir2UV(
+    current_U, current_V = ss_tools.currentVelDir2UV(
         MARS3D["CurrentVelocity"].values, MARS3D["CurrentDirection"].values
     )  # converts velocity and direction to u and v components
     MARS3D["CurrentU"] = (("time", "level", "CrossRange", "GroundRange"), current_U)
@@ -481,7 +485,7 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             raise KeyError(f"Missing required SWOT variables: {missing}")
         SWOT["CurrentU"] = SWOT["ugos_filtered"]
         SWOT["CurrentV"] = SWOT["vgos_filtered"]
-        cvel, cdir = ss.utils.tools.currentUV2VelDir(
+        cvel, cdir = ss_tools.currentUV2VelDir(
             SWOT["CurrentU"].values, SWOT["CurrentV"].values
         )
         SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
@@ -539,7 +543,7 @@ def read_mitgcm(filename, z_layer, file_path=None):
 
     mitgcm = mitgcm.isel(z=z_layer)
 
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = ss_tools.currentUV2VelDir(
         mitgcm["U"].values, mitgcm["V"].values
     )  # converts u and v components to velocity and direction
     mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)

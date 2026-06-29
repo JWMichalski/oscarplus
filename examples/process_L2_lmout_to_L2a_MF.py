@@ -6,7 +6,7 @@ Generates NetCDF files for each step of the process.
 import oscarplus as op
 import os
 import xarray as xr
-import seastar as ss
+from seastar.retrieval.ambiguity_removal import solve_ambiguity
 import numpy as np
 import warnings
 
@@ -56,7 +56,7 @@ ambiguity = {
     "method": "wind",
     "truth": geo,
 }
-L2_sol = ss.retrieval.ambiguity_removal.solve_ambiguity(lmout, ambiguity)
+L2_sol = solve_ambiguity(lmout, ambiguity)
 
 # clean up datasets
 lmout = xr.where(mask, lmout, np.nan)

@@ -19,7 +19,7 @@ mask_unreliable_cells:
     or due to oscillations in mid-beam on the 22.05.2022.
 """
 
-import seastar as ss
+from seastar.utils import tools as ss_tools
 import xarray as xr
 import numpy as np
 import warnings
@@ -45,7 +45,7 @@ def calculate_sigma0(L1b):
     ``xarray.DataSet``
         L1b dataset with the 'Sigma0_db' variable added.
     """
-    Intensity_db = ss.utils.tools.lin2db(L1b["Intensity"])
+    Intensity_db = ss_tools.lin2db(L1b["Intensity"])
     L1b["Sigma0_db"] = (
         Intensity_db  # intensity
         - Intensity_db.mean(
@@ -101,7 +101,7 @@ def compute_beam_land_mask(L1c, dilation=2):
         True where the data is valid and False where it is not.
     """
     DA = L1c["Sigma0"]
-    land_mask = ss.utils.tools.compute_land_mask_from_GSHHS(
+    land_mask = ss_tools.compute_land_mask_from_GSHHS(
         DA.sel(Antenna="Mid"), quiet=True
     )  # compute land masks
     land_mask = xr.DataArray(
@@ -197,7 +197,7 @@ def mask_unreliable_cells(L1c, resolution):
             dims=L1c.Sigma0.sel(Antenna="Mid").dims,
         )
         mid_beam_oscillation_mask[:, 0 : 6 * resolution_multiplier] = True
-        mask = np.logical_or(far_range_mask, mid_beam_oscillation_mask)
+        mask = far_range_mask | mid_beam_oscillation_mask
     else:
         mask = far_range_mask
     mask = mask.drop_vars("Antenna")
