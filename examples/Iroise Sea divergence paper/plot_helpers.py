@@ -862,9 +862,9 @@ def compare_OSCAR_MARS2D_secondary(
     yoffset=0,
 ):
     if secondary_product_sel == "Curl":
-        display_name = "Vorticity"
+        display_name = "vorticity"
     elif secondary_product_sel == "ShearRate":
-        display_name = "Shear Rate"
+        display_name = "shear rate"
     else:
         display_name = secondary_product_sel
 
@@ -926,4 +926,5 @@ def compare_OSCAR_MARS2D_secondary(
         linewidth=2,
         zorder=20,
     )
+    add_letters(axes)
     return axes
