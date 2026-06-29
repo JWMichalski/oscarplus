@@ -27,16 +27,6 @@ from matplotlib.colors import LinearSegmentedColormap
 from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
 
-# Colourmap used for bathymetry on the secondary product plots
-# Bathymetrycmap = LinearSegmentedColormap.from_list(
-#     "Bathymetrycmap",
-#     [
-#         [0.0, "#777777"],
-#         [0.5, "#444444"],
-#         [1.0, "#000000"],
-#     ],
-# )
-
 Bathymetrycmap_blue = LinearSegmentedColormap.from_list(
     "Bathymetrycmap_blue",
     [
@@ -291,7 +281,7 @@ def plot_all_three_on_one(
         ax=axes[1],
         extent=extent,
         title="Surface current divergence",
-        cbar_label="Divergence/f",
+        cbar_label="Current divergence/f",
         vmax=20,
     )
     # Plot vertical current
@@ -377,7 +367,7 @@ def plot_transects(
             "CurrentDivergence",
             ax2,
             "#D81B60",
-            "Divergence/f",
+            "Current divergence/f",
             linestyle="dashdot",
             df=df_current,
         )
@@ -535,7 +525,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         ax=top_axes[1],
         extent=extent,
         title="MARS2D surface current divergence",
-        cbar_label="Divergence/f",
+        cbar_label="Current divergence/f",
         vmax=20,
         zorder=0,
     )
@@ -629,7 +619,7 @@ def plot_MARS2D_and_MARS3D_profiles(
         ax=bottom_axes[1],
         extent=extent,
         title="MARS3D surface current divergence",
-        cbar_label="Divergence/f",
+        cbar_label="Current divergence/f",
         vmax=20,
         zorder=0,
     )
@@ -698,7 +688,7 @@ def MARS2D_through_time(
             ax=axes[1, i],
             extent=extent,
             title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
-            cbar_label="Divergence/f",
+            cbar_label="Current divergence/f",
             vmax=20,
             add_cbar=False,
         )
@@ -723,7 +713,7 @@ def MARS2D_through_time(
             ax=axes[1, 2],
             extent=extent,
             title="MARS2D at " + str(MARS2Ds[2].time.dt.strftime("%H:%M").values),
-            cbar_label="Divergence/f",
+            cbar_label="Current divergence/f",
             vmax=20,
         )
     )
@@ -928,3 +918,36 @@ def compare_OSCAR_MARS2D_secondary(
     )
     add_letters(axes)
     return axes
+
+
+def scatterplot_row(
+    axes,
+    OSCAR,
+    MARS2D_sub,
+    variable,
+    symmetric_ylim,
+):
+    variable_name = variable.replace(" ", "")
+    if variable == "Curl":
+        variable = "Vorticity"
+    splot.scatterplot_var_vs_bathymetry(
+        axes[0],
+        OSCAR,
+        variable_name,
+    )
+    axes[0].set_title(f"OSCAR: current {variable.lower()} vs bathymetry")
+
+    splot.scatterplot_var_vs_bathymetry(
+        axes[1],
+        MARS2D_sub,
+        variable_name,
+    )
+    axes[1].set_title(f"MARS2D: current {variable.lower()} vs bathymetry")
+
+    ylim = max(axes[0].get_ylim()[1], axes[1].get_ylim()[1])
+    if symmetric_ylim:
+        axes[0].set_ylim(-ylim, ylim)
+        axes[1].set_ylim(-ylim, ylim)
+    else:
+        axes[0].set_ylim(0, ylim)
+        axes[1].set_ylim(0, ylim)
