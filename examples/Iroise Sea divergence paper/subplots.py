@@ -155,7 +155,7 @@ def quiver_with_background(
         u=u,
         v=v,
         pivot="mid",
-        zorder=2,
+        zorder=4,
         ax=ax,
         add_guide=False,
         **kwargs,
@@ -192,11 +192,6 @@ def single(
         **kwargs,
     )
 
-    if title is not None:
-        ax.set_title(title)  # adds subfigure title
-    if extent is not None:
-        ax.set_extent(extent)
-    # plot colorbar
     if add_cbar:
         cbar = plt.colorbar(
             single_plot,
@@ -208,6 +203,7 @@ def single(
         if cbar_label is not None:
             cbar.set_label(cbar_label)
     gl = __plot_basics(ax, extent, projection, title, coastlines=coastlines)
+
     return gl
 
 
@@ -375,3 +371,65 @@ def histogram_with_stats(DA, DA_name, ax, variable, color="xkcd:blue", **kwargs)
     ylim = ax.get_ylim()[1]
 
     return stats, ylim
+
+
+def scatterplot_var_vs_bathymetry(
+    ax,
+    DS,
+    variable,
+):
+    data = DS[f"Current{variable}"].values.flatten()
+    depth = (DS["depth"].values).flatten()
+    mask = (~np.isnan(data)) & (~np.isnan(depth))
+    shallow_mask = mask & (depth < 60)
+    deep_mask = mask & (depth >= 60)
+    ax.scatter(depth[deep_mask], data[deep_mask], alpha=0.5, s=20)
+    ax.scatter(
+        depth[shallow_mask],
+        data[shallow_mask],
+        alpha=0.5,
+        s=20,
+        color="xkcd:light blue",
+    )
+    ax.set_xlabel("Depth [m]")
+    ax.set_xlim(left=0, right=105)
+    if variable == "Velocity":
+        ax.set_ylabel("Current velocity (m/s)")
+    elif variable == "ShearRate":
+        ax.set_ylabel("Current shear rate/f")
+    else:
+        ax.set_ylabel(f"Current {variable.lower()}/f")
+    ax.grid(True)
+
+    def plot_mean_and_variance(
+        ax, depth, data, sel_mask, label_suffix="", color="xkcd:brick red"
+    ):
+        mean_val = np.nanmean(data[sel_mask])
+        var_val = np.nanvar(data[sel_mask])
+
+        std_val = np.sqrt(var_val)
+        print(
+            f"{variable} Mean{label_suffix}: {mean_val:.4f},"
+            f"Std{label_suffix}: {std_val:.4f}"
+        )
+        ax.annotate(
+            "",
+            xy=(np.nanmean(depth[sel_mask]), mean_val + std_val),
+            xytext=(np.nanmean(depth[sel_mask]), mean_val - std_val),
+            arrowprops=dict(arrowstyle="]-[", color=color, lw=2.5),
+            annotation_clip=False,
+        )
+        ax.annotate(
+            "",
+            xy=(np.nanmean(depth[sel_mask] + 2), mean_val),
+            xytext=(np.nanmean(depth[sel_mask] - 2), mean_val),
+            arrowprops=dict(arrowstyle="-", color=color, lw=2.5),
+            annotation_clip=False,
+        )
+
+    plot_mean_and_variance(
+        ax, depth, data, shallow_mask, label_suffix=" (shallow)", color="xkcd:light red"
+    )
+    plot_mean_and_variance(
+        ax, depth, data, deep_mask, label_suffix=" (deep)", color="xkcd:dark red"
+    )

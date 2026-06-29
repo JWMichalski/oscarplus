@@ -18,6 +18,8 @@ read_MARS3D :
     Read the MARS3D model data and rename the variables to match the OSCAR data
 read_SWOT :
     Read the SWOT data and rename the variables to match the OSCAR data
+read_mitgcm :
+    Read the MITgcm model data and rename the variables to match the OSCAR data
 """
 
 import os
@@ -26,8 +28,9 @@ import glob
 import xarray as xr
 import pandas as pd
 import numpy as np
-import seastar as ss
-
+from warnings import warn
+from seastar.utils.readers import readNetCDFFile
+from seastar.utils import tools as ss_tools
 
 __data_dirs = {}
 
@@ -36,7 +39,7 @@ def __load_data_dirs():
     """
     Load the directories containing the OSCAR data
     """
-    global __data_dirs
+    # global __data_dirs
     data_dir_file_loc = os.path.dirname(os.path.dirname(__file__))
     with open(os.path.join(data_dir_file_loc, "data_dir.txt"), "r") as file:
         for line in file:
@@ -123,7 +126,11 @@ def read_OSCAR_from_file(
         If the GMF or resolution attributes are not found and not provided
         for levels other than L1b and L1c.
     """
-    DS = ss.utils.readers.readNetCDFFile(filepath)
+
+    DS = readNetCDFFile(filepath)
+
+    if DS is None:
+        raise ValueError(f"Could not read OSCAR data from {filepath}")
 
     # add atributes to the dataset
     if "DateTaken" not in DS.attrs:
@@ -350,13 +357,13 @@ def read_MARS2D(filename, resolution, file_path=None):
 
     MARS2D = xr.open_mfdataset(file_path)  # change path to select a different file
     # add current velocity and direction
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = ss_tools.currentUV2VelDir(
         MARS2D["U"].values, MARS2D["V"].values
     )  # converts u and v components to velocity and direction
     MARS2D["CurrentVelocity"] = (("time", "nj", "ni"), cvel)
     MARS2D["CurrentDirection"] = (("time", "nj", "ni"), cdir)
     MARS2D = MARS2D.rename({"ni": "GroundRange", "nj": "CrossRange"})
-    current_U, current_V = ss.utils.tools.currentVelDir2UV(
+    current_U, current_V = ss_tools.currentVelDir2UV(
         MARS2D["CurrentVelocity"].values, MARS2D["CurrentDirection"].values
     )  # converts velocity and direction to u and v components
     MARS2D["CurrentU"] = (("time", "CrossRange", "GroundRange"), current_U)
@@ -393,13 +400,13 @@ def read_MARS3D(filename, resolution, file_path=None):
 
     MARS3D = xr.open_mfdataset(file_path)  # change path to select a different file
     # add current velocity and direction
-    cvel, cdir = ss.utils.tools.currentUV2VelDir(
+    cvel, cdir = ss_tools.currentUV2VelDir(
         MARS3D["UZ"].values, MARS3D["VZ"].values
     )  # converts u and v components to velocity and direction
     MARS3D["CurrentVelocity"] = (("time", "level", "nj", "ni"), cvel)
     MARS3D["CurrentDirection"] = (("time", "level", "nj", "ni"), cdir)
     MARS3D = MARS3D.rename({"ni": "GroundRange", "nj": "CrossRange"})
-    current_U, current_V = ss.utils.tools.currentVelDir2UV(
+    current_U, current_V = ss_tools.currentVelDir2UV(
         MARS3D["CurrentVelocity"].values, MARS3D["CurrentDirection"].values
     )  # converts velocity and direction to u and v components
     MARS3D["CurrentU"] = (("time", "level", "CrossRange", "GroundRange"), current_U)
@@ -418,7 +425,8 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
     Parameters
     ----------
     level : ``string``
-        Level of the SWOT data ('L3_unsmoothed', 'L3_expert', 'L2_expert').
+        Level of the SWOT data
+        ('L3_unsmoothed', 'L3_expert', 'L2_unsmoothed', 'L2_expert').
     cycle : ``string``
         Cycle of the SWOT data (e.g. '001').
     pass_number : ``string``
@@ -450,11 +458,14 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             file_pattern = f"SWOT_L3_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
         case "L3_expert":
             file_pattern = f"SWOT_L3_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
+        case "L2_unsmoothed":
+            file_pattern = f"SWOT_L2_LR_SSH_Unsmoothed_{cycle}_{pass_number}_*.nc"
         case "L2_expert":
             file_pattern = f"SWOT_L2_LR_SSH_Expert_{cycle}_{pass_number}_*.nc"
         case _:
             raise ValueError(
-                "Level must be 'L3_unsmoothed', 'L3_expert', or 'L2_expert'"
+                "Level must be 'L3_unsmoothed', 'L3_expert',"
+                "'L2_unsmoothed', or 'L2_expert'"
             )
 
     file_list = glob.glob(os.path.join(SWOT_data_dir, file_pattern))
@@ -474,16 +485,71 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             raise KeyError(f"Missing required SWOT variables: {missing}")
         SWOT["CurrentU"] = SWOT["ugos_filtered"]
         SWOT["CurrentV"] = SWOT["vgos_filtered"]
-        cvel, cdir = ss.utils.tools.currentUV2VelDir(
+        cvel, cdir = ss_tools.currentUV2VelDir(
             SWOT["CurrentU"].values, SWOT["CurrentV"].values
         )
         SWOT["CurrentVelocity"] = (("num_lines", "num_pixels"), cvel)
         SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
-    elif level.startswith("L2"):
+    elif level == "L2_expert":
         SWOT["WindVelocity"] = SWOT["wind_speed_karin"]
         pass
-    SWOT = SWOT.rename_dims({"num_lines": "CrossRange", "num_pixels": "GroundRange"})
+    if "num_lines" in SWOT.dims and "num_pixels" in SWOT.dims:
+        SWOT = SWOT.rename_dims(
+            {"num_lines": "CrossRange", "num_pixels": "GroundRange"}
+        )
+    else:
+        warn("SWOT dataset does not contain expected dimensions 'num_lines'"
+             "and 'num_pixels'."
+             "This may lead to issues with dimension names."
+             "CrossRange and GroundRange might be missing.")
     return SWOT
+
+
+def read_mitgcm(filename, z_layer, file_path=None):
+    """
+    Reads one layer of the MITgcm model data from the given directory
+
+    Renames the variables to match the OSCAR data.
+
+    Parameters
+    ----------
+    filename : ``string``
+        Name of the file containing the MITgcm model data.
+    z_layer : ``int``
+        The z layer to select from the MITgcm data.
+    file_path : ``string``, optional
+        Path to the file containing the MITgcm model data.
+        If none is given, the data directory is selected from data_dir.txt.
+    Returns
+    -------
+    mitgcm : ``xarray.DataSet``
+        Dataset containing the MITgcm model data with the renamed variables.
+    """
+    if file_path is None:
+        # THIS IS A HACK TO GET THE MITGCM DATA DIR WITHOUT ADDING IT TO DATA_DIR.TXT
+        # ASSUMES THE MITGCM DATA DIR IS IN THE SAME DIR AS THE MARS2D DATA DIR
+        # IT WILL BE FIXED WHEN THE MITGCM DATA DIR IS ADDED TO DATA_DIR.TXT
+        file_path = os.path.join(
+            os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm", filename
+        )
+    else:
+        file_path = os.path.join(file_path, filename)
+
+    mitgcm = xr.open_mfdataset(file_path)  # change path to select a different file
+
+    mitgcm = mitgcm.rename(
+        {"y": "CrossRange", "x": "GroundRange", "XC": "longitude", "YC": "latitude"}
+    )
+
+    mitgcm = mitgcm.isel(z=z_layer)
+
+    cvel, cdir = ss_tools.currentUV2VelDir(
+        mitgcm["U"].values, mitgcm["V"].values
+    )  # converts u and v components to velocity and direction
+    mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)
+    mitgcm["CurrentDirection"] = (("time", "CrossRange", "GroundRange"), cdir)
+    mitgcm = mitgcm.rename({"U": "CurrentU", "V": "CurrentV"})
+    return mitgcm
 
 
 __load_data_dirs()

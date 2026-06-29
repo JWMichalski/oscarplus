@@ -17,7 +17,7 @@ Functions
 
 import numpy as np
 import xarray as xr
-import seastar as ss
+from seastar.utils import tools as ss_tools
 from oscarplus.tools.calc import median_angle
 from oscarplus.tools.utils import no_of_NN, get_resolution, set_resolution
 
@@ -111,7 +111,7 @@ def directionmagnitude_median_windcurrent(L2, min_no_of_NN=2):
         L2_median["CurrentVelocity"],
     )
     # calculate current components
-    CurU, CurV = ss.utils.tools.currentVelDir2UV(
+    CurU, CurV = ss_tools.currentVelDir2UV(
         L2_median.CurrentVelocity, L2_median.CurrentDirection
     )
     L2_median["CurrentU"] = CurU
@@ -133,7 +133,7 @@ def directionmagnitude_median_windcurrent(L2, min_no_of_NN=2):
         L2_median["EarthRelativeWindSpeed"],
     )
     # calculate wind components
-    WinU, WinV = ss.utils.tools.windSpeedDir2UV(
+    WinU, WinV = ss_tools.windSpeedDir2UV(
         L2_median.EarthRelativeWindSpeed, L2_median.EarthRelativeWindDirection
     )
     L2_median["EarthRelativeWindU"] = WinU
@@ -177,10 +177,10 @@ def component_median_windcurrent(L2, window_size=3):
     L2["EarthRelativeWindU"] = filter_component(L2["EarthRelativeWindU"], window_size)
     L2["EarthRelativeWindV"] = filter_component(L2["EarthRelativeWindV"], window_size)
     # calculate current components
-    CVel, CDir = ss.utils.tools.currentUV2VelDir(L2.CurrentU, L2.CurrentV)
+    CVel, CDir = ss_tools.currentUV2VelDir(L2.CurrentU, L2.CurrentV)
     L2["CurrentVelocity"] = xr.DataArray(CVel, dims=["CrossRange", "GroundRange"])
     L2["CurrentDirection"] = xr.DataArray(CDir, dims=["CrossRange", "GroundRange"])
-    WinVel, WinDir = ss.utils.tools.windUV2SpeedDir(
+    WinVel, WinDir = ss_tools.windUV2SpeedDir(
         L2.EarthRelativeWindU, L2.EarthRelativeWindV
     )
     L2["EarthRelativeWindSpeed"] = xr.DataArray(
