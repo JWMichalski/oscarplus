@@ -858,7 +858,7 @@ def compare_OSCAR_MARS2D_secondary(
     else:
         display_name = secondary_product_sel
 
-    _, axes, extent = make_axes(
+    fig, axes, extent = make_axes(
         model,
         1,
         2,
@@ -917,7 +917,7 @@ def compare_OSCAR_MARS2D_secondary(
         zorder=20,
     )
     add_letters(axes)
-    return axes
+    return fig, axes
 
 
 def scatterplot_row(
