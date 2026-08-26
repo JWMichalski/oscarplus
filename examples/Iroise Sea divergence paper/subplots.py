@@ -19,6 +19,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import scipy
 from numbers import Number
 from oscarplus.processing.filtering import downscale
@@ -433,3 +434,92 @@ def scatterplot_var_vs_bathymetry(
     plot_mean_and_variance(
         ax, depth, data, deep_mask, label_suffix=" (deep)", color="xkcd:dark red"
     )
+
+
+def multiquiver(
+    DS,
+    u,
+    v,
+    extent,
+    ax,
+    title,
+    color,
+    projection=ccrs.PlateCarree(),
+    legend_location="upper right",
+    legend="none",
+    scale=1,
+    headwidth=3,
+    headlength=5,
+    coastlines=True,
+    **kwargs,
+):
+    """
+    Plots multiple quiver plots on top of each other
+
+    Parameters
+    ----------
+    DS : ``list`` of ``xarray.datasets``
+        List of xarray datasets with longitude and latitude data coordinates
+    u: ``string``
+        name of the u component of the vector
+    v: ``string``
+        name of the v component of the vector
+    extent: ``list``
+        [eastmost longitude, westmost longitude, southmost latitude, northmost latitude]
+        plot's extent
+    ax : ``matplotlib.axes``
+        axes to plot on
+    title : ``string``
+        title of the plot
+    projection : ``cartopy.crs``, optional
+        projection to use
+        Default is PlateCarree
+    color : ``list`` of ``strings``
+        list of colours for each quiver plot
+    legend : ``list`` of ``strings``
+        list of legends for each quiver plot
+    scale : ``float``, optional
+        scale for the quiver plots
+        Default is 1
+    headwidth : ``float``, optional
+        width of the arrow head
+        Default is 3
+    headlength : ``float``, optional
+        length of the arrow head
+        Default is 5
+    coastlines : ``bool``, optional
+        whether to add coastlines to the plot
+    Returns
+    -------
+    gl : ``cartopy.mpl.gridliner`` or None
+        gridlines object if PlateCarree projection, None otherwise
+    """
+    # plot all quiver plots
+    for i in range(0, len(DS)):
+        DS[i].plot.quiver(
+            x="longitude",
+            y="latitude",
+            u=u,
+            v=v,
+            pivot="tail",
+            ax=ax,
+            add_guide=False,
+            color=color[i],
+            scale=scale,
+            headwidth=headwidth,
+            headlength=headlength,
+            **kwargs,
+        )
+
+    # add legend
+    if legend is not None:
+        alpha = kwargs.get("alpha", 1)
+        legend_line = [0] * len(color)
+        for i in range(0, len(color)):
+            legend_line[i] = mlines.Line2D(
+                [], [], color=color[i], alpha=alpha, label=legend[i]
+            )
+        ax.legend(handles=legend_line, fontsize=6, loc=legend_location)
+
+    gl = __plot_basics(ax, extent, projection, title, coastlines=coastlines)
+    return gl
