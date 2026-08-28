@@ -125,7 +125,7 @@ def calculate_upwelling_SWT(DS, depth):
     align_with_track(DS)
     hU = interpolated_depth * DS["CurrentU_rot"]
     hV = interpolated_depth * DS["CurrentV_rot"]
-    DS["CurrentW"] = calc.wrap_numpy_2D_vector_calc(
+    DS["CurrentW"] = -calc.wrap_numpy_2D_vector_calc(
         hU, hV, "Divergence"
     ) / get_resolution(DS)
     __drop_rotated_components(DS)
