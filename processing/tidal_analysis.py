@@ -7,6 +7,8 @@ Functions
 ---------
 - split_dataset_by_phase:
     split a dataset into four datasets based on the tidal cycle phase
+- spring_neap_phase(ds):
+    calculates spring neap cycle phase
 """
 import numpy as np
 
@@ -59,3 +61,19 @@ def split_dataset_by_phase(ds, cycle_phase_var):
         "ebb": ds_ebb,
         "flood": ds_flood,
     }
+
+
+def spring_neap_phase(ds):
+    """
+    Calculates spring neap cycle phase.
+    The phase is added in "spring_neap_cycle_phase" DataArray.
+    Parameters
+    ----------
+    ds : ``xarray.DataSet``
+        Dataset to calculate phase for.
+        Must have 'M2_cycle_phase' and 'S2_cycle_phase' DataArrays.
+    Returns
+    -------
+    None
+    """
+    ds["spring_neap_cycle_phase"]=(ds["M2_cycle_phase"]-["S2_cycle_phase"])%360
