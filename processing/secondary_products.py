@@ -41,7 +41,7 @@ def __drop_rotated_components(DS):
         )
 
 
-def calculate_secondary_products(DS, resolution=None):
+def calculate_secondary_products(DS, resolution=None, angle_adjustment=True):
     """
     Calculate secondary products from the L2_AR_MF dataset
 
@@ -84,8 +84,11 @@ def calculate_secondary_products(DS, resolution=None):
 
     if resolution is None:
         resolution = get_resolution(DS)
-
-    align_with_track(DS)
+    if angle_adjustment:
+        align_with_track(DS)
+    else:
+        DS["CurrentU_rot"] = DS["CurrentU"]
+        DS["CurrentV_rot"] = DS["CurrentV"]
 
     f = (
         2
