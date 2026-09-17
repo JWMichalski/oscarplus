@@ -5,10 +5,22 @@ This module contains functions to perform tidal analysis
 
 Functions
 ---------
+- get_tidal_frequencies:
+    Returns the tidal frequencies for M2 and S2 in 1/s and rad/s.
+- fit_tidal_constituents:
+    Fit tidal constituents to the given values using the UTide package.
+- m2_s2_from_coeff:
+    Extract the amplitudes and phases of the M2 and S2 tidal constituents
+    from the UTide coefficients.
+- calculate_cycle_phase:
+    Calculate the tidal cycle phase for a given tidal constituent.
+- tidal_cycle_phases(ds):
+    calculate the tidal cycle phases and add to the dataset
 - split_dataset_by_phase:
     split a dataset into four datasets based on the tidal cycle phase
 - spring_neap_phase(ds):
     calculates spring neap cycle phase
+
 """
 
 import numpy as np
@@ -162,7 +174,7 @@ def calculate_cycle_phase(latitude, phi, time, coef, name):
     return (V_M2 - phi) % 360.0
 
 
-def add_tidal_cycle_phases(ds, print_progress=True):
+def tidal_cycle_phases(ds, print_progress=True):
     """
     Calculate the tidal cycle phases and add to the dataset.
     Parameters
