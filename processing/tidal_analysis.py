@@ -162,27 +162,22 @@ def calculate_cycle_phase(latitude, phi, time, coef, name):
     return (V_M2 - phi) % 360.0
 
 
-def add_tidal_cycle_phases(
-    ds,
-    output_path=None,
-):
+def add_tidal_cycle_phases(ds, print_progress=True):
     """
     Calculate the tidal cycle phases and add to the dataset.
-    Optionally plot the cycle phases for a specific grid cell.
     Parameters
     ----------
     ds : ``xarray.DataSet``
         Dataset to calculate cycle phases for.
         Must have 'Eta' DataArray.
-    output_path : ``str``, optional
-        Path to save the output dataset.
     Returns
     -------
     coef : ``dict``
         Coefficients from the utide.solve function.
     """
+    if print_progress:
+        print("Calculating M2 and S2")
 
-    print("Calculating M2 and S2")
     coef = xr.apply_ufunc(
         fit_tidal_constituents,
         ds["Eta"],
@@ -222,7 +217,8 @@ def add_tidal_cycle_phases(
         )
     )
 
-    print("Calculating cycle phase")
+    if print_progress:
+        print("Calculating cycle phase")
 
     M2_cycle_phase = xr.apply_ufunc(
         calculate_cycle_phase,
@@ -291,12 +287,6 @@ def add_tidal_cycle_phases(
     ds["M2_phase"].attrs["units"] = "degrees"
     ds["S2_amplitude"].attrs["units"] = ds["Eta"].attrs.get("units", "")
     ds["S2_phase"].attrs["units"] = "degrees"
-
-    if output_path is not None:
-        print(f"Saving dataset to {output_path}.nc")
-        ds.to_netcdf(
-            output_path,
-        )
 
     return coef
 
