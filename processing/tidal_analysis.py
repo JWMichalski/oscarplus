@@ -281,8 +281,8 @@ def tidal_cycle_phases(ds, print_progress=True):
         },
     )
 
-    ds["M2_cycle_phase"] = M2_cycle_phase.compute()
-    ds["S2_cycle_phase"] = S2_cycle_phase.compute()
+    ds["M2_cycle_phase"] = M2_cycle_phase.compute().astype(np.float32())
+    ds["S2_cycle_phase"] = S2_cycle_phase.compute().astype(np.float32())
 
     ds["M2_amplitude"].attrs["units"] = ds["Eta"].attrs.get("units", "")
     ds["M2_phase"].attrs["units"] = "degrees"
@@ -366,4 +366,7 @@ def spring_neap_phase(ds):
     -------
     None
     """
-    ds["spring_neap_cycle_phase"] = (ds["M2_cycle_phase"] - ["S2_cycle_phase"]) % 360
+    ds["spring_neap_cycle_phase"] = (
+        ds["M2_cycle_phase"].astype(np.float32())
+        - ds["S2_cycle_phase"].astype(np.float32())
+    ) % 360
