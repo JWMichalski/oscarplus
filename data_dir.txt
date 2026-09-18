@@ -7,6 +7,7 @@
 OSCAR:/PATH/TO/folder_with_OSCAR
 MARS2D:/PATH/TO/folder_with_MARS2D
 MARS3D:/PATH/TO/folder_with_MARS3D
+MITgcm:/PATH/TO/folder_with_MITgcm
 SWOT:/PATH/TO/folder_with_SWOT
 bathymetry:/PATH/TO/folder_with_bathymetry
 wind:/PATH/TO/folder_with_wind
