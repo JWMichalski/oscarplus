@@ -26,7 +26,6 @@ from matplotlib.patches import FancyArrowPatch, Polygon
 from matplotlib.colors import LinearSegmentedColormap
 from oscarplus.tools.utils import cut_NaNs, find_six_track_corners
 
-
 Bathymetrycmap_blue = LinearSegmentedColormap.from_list(
     "Bathymetrycmap_blue",
     [
@@ -250,7 +249,7 @@ def plot_all_three_on_one(
             vmin=40,
             vmax=120,
             level_step=20,
-            legend_title="Elevation",
+            legend_title="Depth [m]",
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
@@ -496,7 +495,7 @@ def plot_MARS2D_and_MARS3D_profiles(
             vmin=40,
             vmax=120,
             level_step=20,
-            legend_title="Elevation",
+            legend_title="Depth [m]",
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
@@ -564,7 +563,7 @@ def plot_MARS2D_and_MARS3D_profiles(
             vmin=40,
             vmax=120,
             level_step=20,
-            legend_title="Elevation",
+            legend_title="Depth [m]",
             linewidths=0.8,
             legend_location=legend_location,
             cmap=cmap,
@@ -728,7 +727,7 @@ def MARS2D_through_time(
                 vmin=40,
                 vmax=120,
                 level_step=20,
-                legend_title="Elevation",
+                legend_title="Depth [m]",
                 linewidths=0.8,
                 legend_location=legend_location,
                 cmap=cmaps[i],
@@ -798,7 +797,7 @@ def OSCAR_MARS_side_by_side(
             vmin=40,
             vmax=120,
             level_step=20,
-            legend_title="Elevation",
+            legend_title="Depth",
             linewidths=0.8,
             legend_location=legend_location,
             cmap=Bathymetrycmap_blue,
@@ -878,7 +877,7 @@ def compare_OSCAR_MARS2D_secondary(
             vmin=40,
             vmax=120,
             level_step=20,
-            legend_title="Elevation",
+            legend_title="Depth [m]",
             linewidths=0.8,
             legend_location="upper left",
             cmap=Bathymetrycmap_orange,
