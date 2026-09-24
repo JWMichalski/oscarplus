@@ -498,14 +498,16 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
             {"num_lines": "CrossRange", "num_pixels": "GroundRange"}
         )
     else:
-        warn("SWOT dataset does not contain expected dimensions 'num_lines'"
-             "and 'num_pixels'."
-             "This may lead to issues with dimension names."
-             "CrossRange and GroundRange might be missing.")
+        warn(
+            "SWOT dataset does not contain expected dimensions 'num_lines'"
+            "and 'num_pixels'."
+            "This may lead to issues with dimension names."
+            "CrossRange and GroundRange might be missing."
+        )
     return SWOT
 
 
-def read_mitgcm(filename, z_layer, level, data_dir=None):
+def read_mitgcm(level, data_dir=None, **kwargs):
     """
     Reads one layer of the MITgcm model data from the given directory
 
@@ -513,43 +515,93 @@ def read_mitgcm(filename, z_layer, level, data_dir=None):
 
     Parameters
     ----------
-    filename : ``string``
-        Name of the file containing the MITgcm model data.
-    z_layer : ``int``
-        The z layer to select from the MITgcm data.
-    file_path : ``string``, optional
-        Path to the file containing the MITgcm model data.
-        If none is given, the data directory is selected from data_dir.txt.
+    level : ``string``
+        Level of the MITgcm data (original, tides_surface).
+        Original level requires filename and z_layer to be provided in kwargs.
+        tides_surface requires either:
+          year and month in the form YYYY_MM to be provided in kwargs,
+          or filename to be provided in kwargs if data_dir is provided.
+    data_dir : ``string``, optional
+        Path to the directory containing the MITgcm data.
+        If none is given, the data directory is read from data_dir.txt.
+    **kwargs : ``dict``
+        Additional keyword arguments.
+        z_layer : ``int``, optional
+            The index of the vertical layer to read (required for level 'original').
+        filename : ``string``, optional
+            The name of the file to read (required for level 'original').
+        year_month : ``string``, optional
+            The year and month in the form YYYY_MM (required for level 'tides_surface').
     Returns
     -------
     mitgcm : ``xarray.DataSet``
-        Dataset containing the MITgcm model data with the renamed variables.
+        Dataset containing the MITgcm model data.
     """
-    if level is "original":
-        if data_dir is None:
-            # THIS IS A HACK TO GET THE MITGCM DATA DIR WITHOUT ADDING IT TO DATA_DIR.TXT
-            # ASSUMES THE MITGCM DATA DIR IS IN THE SAME DIR AS THE MARS2D DATA DIR
-            # IT WILL BE FIXED WHEN THE MITGCM DATA DIR IS ADDED TO DATA_DIR.TXT
-            data_dir = os.path.join(
-                os.path.dirname(get_data_dirs()["MARS2D"]), "MITgcm", filename
+    match level:
+        # Original MITgcm data, requires filename and z_layer to be provided in kwargs
+        case "original":
+            z_layer = kwargs.get("z_layer")
+            filename = kwargs.get("filename")
+            if z_layer is None:
+                raise ValueError("z_layer must be provided for level 'original'")
+            if filename is None:
+                raise ValueError("filename must be provided for level 'original'")
+
+            if data_dir is None:
+                data_dir = os.path.join(
+                    os.path.dirname(get_data_dirs()["MITgcm"]), "original", filename
+                )
+            else:
+                data_dir = os.path.join(data_dir, filename)
+
+            mitgcm = xr.open_mfdataset(
+                data_dir
+            )  # change path to select a different file
+
+            mitgcm = mitgcm.rename(
+                {
+                    "y": "CrossRange",
+                    "x": "GroundRange",
+                    "XC": "longitude",
+                    "YC": "latitude",
+                }
             )
-        else:
-            data_dir = os.path.join(data_dir, filename)
 
-        mitgcm = xr.open_mfdataset(data_dir)  # change path to select a different file
+            mitgcm = mitgcm.isel(z=z_layer)
 
-        mitgcm = mitgcm.rename(
-            {"y": "CrossRange", "x": "GroundRange", "XC": "longitude", "YC": "latitude"}
-        )
+            cvel, cdir = ss_tools.currentUV2VelDir(
+                mitgcm["U"].values, mitgcm["V"].values
+            )  # converts u and v components to velocity and direction
+            mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)
+            mitgcm["CurrentDirection"] = (("time", "CrossRange", "GroundRange"), cdir)
+            mitgcm = mitgcm.rename({"U": "CurrentU", "V": "CurrentV"})
 
-        mitgcm = mitgcm.isel(z=z_layer)
+        # Tides surface MITgcm data, requires year_month to be provided in kwargs
+        # Generated using tidal_analysis.py functions, and stored in tides_surface
+        case "tides_surface":
+            if data_dir is None:
+                year_month = kwargs.get("year_month")
+                if year_month is None:
+                    raise ValueError(
+                        "year_month must be provided for level 'tides_surface'"
+                        "if data_dir is not provided"
+                    )
+                file_dir = os.path.join(
+                    os.path.dirname(get_data_dirs()["MITgcm"]),
+                    "tides_surface",
+                    year_month,
+                )
+            else:
+                filename = kwargs.get("filename")
+                if filename is None:
+                    raise ValueError(
+                        "filename must be provided for level 'tides_surface'"
+                        "if data_dir is provided"
+                    )
+                file_dir = os.path.join(data_dir, filename)
 
-        cvel, cdir = ss_tools.currentUV2VelDir(
-            mitgcm["U"].values, mitgcm["V"].values
-        )  # converts u and v components to velocity and direction
-        mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)
-        mitgcm["CurrentDirection"] = (("time", "CrossRange", "GroundRange"), cdir)
-        mitgcm = mitgcm.rename({"U": "CurrentU", "V": "CurrentV"})
+            mitgcm = xr.open_mfdataset(file_dir)
+
     return mitgcm
 
 
