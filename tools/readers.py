@@ -548,9 +548,7 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                 raise ValueError("filename must be provided for level 'original'")
 
             if data_dir is None:
-                data_dir = os.path.join(
-                    os.path.dirname(get_data_dirs()["MITgcm"]), "original", filename
-                )
+                data_dir = os.path.join(get_data_dirs()["MITgcm"], "original", filename)
             else:
                 data_dir = os.path.join(data_dir, filename)
 
@@ -587,9 +585,9 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                         "if data_dir is not provided"
                     )
                 file_dir = os.path.join(
-                    os.path.dirname(get_data_dirs()["MITgcm"]),
+                    get_data_dirs()["MITgcm"],
                     "tides_surface",
-                    year_month,
+                    f"processed_sea_of_iroise_{year_month}.nc",
                 )
             else:
                 filename = kwargs.get("filename")
@@ -600,6 +598,7 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                     )
                 file_dir = os.path.join(data_dir, filename)
 
+            print(file_dir)
             mitgcm = xr.open_mfdataset(file_dir)
 
     return mitgcm
