@@ -13,9 +13,9 @@ Functions
 
 from oscarplus.tools.utils import cut_to_extent
 
-__EXTENT_USHANT = [-5.25, -5, 48.3, 48.6]
+__EXTENT_USHANT_ISLAND = [-5.25, -5, 48.3, 48.6]
 __EXTENT_OPEN_SEA = [-6.75, -5.5, 48.5, 49.5]
-__EXTENT_SHELF_EDGE = [-6.75, -5.5, 47, 47.7, 5]
+__EXTENT_SHELF_EDGE = [-6.75, -5.5, 47, 47.7]
 
 
 def get_extent():
@@ -29,9 +29,9 @@ def get_extent():
         [lon_min, lon_max, lat_min, lat_max].
     """
     return {
-        "ushant": __EXTENT_USHANT,
-        "open sea": __EXTENT_OPEN_SEA,
-        "shelf edge": __EXTENT_SHELF_EDGE,
+        "Ushant Island": __EXTENT_USHANT_ISLAND,
+        "Open Sea": __EXTENT_OPEN_SEA,
+        "Shelf Edge": __EXTENT_SHELF_EDGE,
     }
 
 
