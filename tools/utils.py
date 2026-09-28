@@ -714,7 +714,7 @@ def cut_to_extent(DS, extent):
     """
     Cut the dataset to the given extent.
     WARNING: Measures the distance quadratically, not suitable for large distances.
-
+    WARNING: Based on 2 points, may not be accurate for non-rectangular tracks.
     Parameters
     ----------
     DS : ``xarray.DataSet``
@@ -734,8 +734,9 @@ def cut_to_extent(DS, extent):
     """
     max_GroundRange, max_CrossRange = find_closest_lon_lat(extent[1], extent[3], DS)
     min_GroundRange, min_CrossRange = find_closest_lon_lat(extent[0], extent[2], DS)
+    print(min_GroundRange, max_GroundRange, min_CrossRange, max_CrossRange)
     DS_out = DS.isel(
-        GroundRange=range(min_GroundRange, max_GroundRange),
+        GroundRange=slice(min_GroundRange, max_GroundRange),
         CrossRange=slice(min_CrossRange, max_CrossRange),
     )
     return DS_out
