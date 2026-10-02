@@ -184,7 +184,7 @@ def tidal_cycle_phases(ds, print_progress=True):
         Must have 'Eta' DataArray.
     Returns
     -------
-    coef : ``dict``
+    coef : ``xarray.DataArray``
         Coefficients from the utide.solve function.
     """
     if print_progress:
