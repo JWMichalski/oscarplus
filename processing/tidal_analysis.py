@@ -303,7 +303,7 @@ def tidal_cycle_phases(ds, print_progress=True):
     return coef
 
 
-def split_dataset_by_phase(ds, cycle_phase_var):
+def split_dataset_by_phase(ds, cycle_phase_var, tide_window=90):
     """
     Split a dataset into four datasets based on the tidal cycle phase.
 
@@ -314,22 +314,36 @@ def split_dataset_by_phase(ds, cycle_phase_var):
     cycle_phase_var : ``str``
         Name of the variable in ds that contains the tidal cycle phase.
         The variable must be in degrees, with 0 degrees corresponding to high water.
+    tide_window : ``float``, optional
+        Width of the window around high water and low water in degrees.
+        Must be between 0 and 90. Default is 90.
     Returns
     -------
     dict
         Dictionary with four datasets, one for each tidal phase:
-        - "HW": high water (0-45 degrees and 315-360 degrees)
-        - "LW": low water (135-225 degrees)
-        - "ebb": ebb tide (45-135 degrees)
-        - "flood": flood tide (225-315 degrees)
+        - "HW": high water (around 0 degrees)
+        - "LW": low water (around 180 degrees)
+        - "ebb": ebb tide (around 90 degrees)
+        - "flood": flood tide (around 270 degrees)
     """
     cycle_phase = ds[cycle_phase_var]
 
+    if tide_window < 0 or tide_window > 90:
+        raise ValueError("tide_window must be between 0 and 90 degrees")
+
+    half_tide_window = tide_window / 2.0
+
     # calculate masks based on the tidal cycle phase in degrees
-    mask_HW = (cycle_phase >= 360 - 45) | (cycle_phase < 45)
-    mask_LW = (cycle_phase >= 180 - 45) & (cycle_phase < 180 + 45)
-    mask_ebb = (cycle_phase >= 90 - 45) & (cycle_phase < 90 + 45)
-    mask_flood = (cycle_phase >= 270 - 45) & (cycle_phase < 270 + 45)
+    mask_HW = (cycle_phase >= 360 - half_tide_window) | (cycle_phase < half_tide_window)
+    mask_LW = (cycle_phase >= 180 - half_tide_window) & (
+        cycle_phase < 180 + half_tide_window
+    )
+    mask_ebb = (cycle_phase >= 90 - half_tide_window) & (
+        cycle_phase < 90 + half_tide_window
+    )
+    mask_flood = (cycle_phase >= 270 - half_tide_window) & (
+        cycle_phase < 270 + half_tide_window
+    )
 
     # make sure that the masks do not overlap
     assert not np.any(mask_HW & mask_LW), "HW overlaps LW"
