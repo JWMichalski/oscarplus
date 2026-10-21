@@ -225,7 +225,7 @@ def tidal_cycle_phases(ds, print_progress=True):
             ],
             vectorize=True,
             dask="parallelized",
-            output_dtypes=[float, float, float, float],
+            output_dtypes=[np.float32, np.float32, np.float32, np.float32],
         )
     )
 
