@@ -14,6 +14,8 @@ prepare_MARS2D:
 remove_unreliable_cells:
     Remove the cells that are unreliable due to inoptimal incidence angle
     or oscillations in mid-beam on the 22.05.2022
+rotate_to_geo_coords:
+    Rotate the velocity components from model grid coords to geographic coords.
 """
 
 import xarray as xr
