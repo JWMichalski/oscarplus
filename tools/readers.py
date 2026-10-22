@@ -604,7 +604,6 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                     )
                 file_dir = os.path.join(data_dir, filename)
 
-            print(file_dir)
             mitgcm = xr.open_mfdataset(file_dir)
 
     return mitgcm
