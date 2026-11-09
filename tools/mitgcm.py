@@ -30,7 +30,7 @@ def get_extent():
     """
     return {
         "Ushant Island": __EXTENT_USHANT_ISLAND,
-        "Open Sea": __EXTENT_SHELF,
+        "Shelf": __EXTENT_SHELF,
         "Shelf Edge": __EXTENT_SHELF_EDGE,
     }
 
