@@ -81,7 +81,7 @@ def fit_tidal_constituents(values, latitude, time):
         time[valid],
         values[valid],
         lat=latitude,
-        constit=["M2", "S2", "N2", "K1", "O1"],
+        constit=["M2", "S2", "N2", "K2", "K1", "O1"],
         method="ols",
         conf_int="linear",
         trend=False,
