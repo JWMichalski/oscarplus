@@ -20,6 +20,8 @@ read_SWOT :
     Read the SWOT data and rename the variables to match the OSCAR data
 read_mitgcm :
     Read the MITgcm model data and rename the variables to match the OSCAR data
+read_and_merge_multiple_mitgcm :
+    Read multiple months of the MITgcm model data and merge them into a single dataset
 """
 
 import os
@@ -603,18 +605,25 @@ def read_mitgcm(level, data_dir=None, **kwargs):
     return mitgcm
 
 
-def read_and_merge_multiple_mitgcm(year_months):
+def read_and_merge_multiple_mitgcm(**kwargs):
     """
-    Reads multiple layers of the MITgcm model tides_surface level data
+    Reads multiple months of the MITgcm model tides_surface level data
     from the default directory and merges them into a single dataset.
 
     Renames the variables to match the OSCAR data.
 
     Parameters
     ----------
-    year_months : ``list`` of ``str``
-        List of year and month in the form YYYY_MM to be provided in kwargs.
-
+    **kwargs : ``dict``
+        Additional keyword arguments.
+        year_months : ``list of strings``, optional
+            List of year and month strings in the form YYYY_MM to read.
+            If year_months is not provided, year and months must be provided in kwargs.
+            The function will then generate the year_months list from the provided year and months.
+        year : ``string``, optional
+            Year string in the form YYYY.
+        months : ``list of strings``, optional
+            List of month strings in the form MM.
     data_dir : ``string``, optional
         Directory containing the MITgcm data. If not provided, the default data directory will be used.
 
@@ -625,6 +634,19 @@ def read_and_merge_multiple_mitgcm(year_months):
 
     """
     datasets = []
+    if "year_months" in kwargs:
+        year_months = kwargs.get("year_months")
+        if not isinstance(year_months, list):
+            raise ValueError("year_months must be a list of strings in the form YYYY_MM")
+    elif "year" and "months" in kwargs:
+            year = kwargs.get("year")
+            months = kwargs.get("months")
+            year_months = [f"{year}_{month}" for month in months]
+    else:
+        raise ValueError(
+            "Either year_months or year and months must be provided in kwargs"
+        )
+    
     for year_month in year_months:
         mitgcm = read_mitgcm(
             level="tides_surface",
