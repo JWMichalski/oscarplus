@@ -492,7 +492,6 @@ def read_SWOT(level, cycle, pass_number, data_dir=None):
         SWOT["CurrentDirection"] = (("num_lines", "num_pixels"), cdir)
     elif level == "L2_expert":
         SWOT["WindVelocity"] = SWOT["wind_speed_karin"]
-        pass
     if "num_lines" in SWOT.dims and "num_pixels" in SWOT.dims:
         SWOT = SWOT.rename_dims(
             {"num_lines": "CrossRange", "num_pixels": "GroundRange"}
@@ -602,6 +601,38 @@ def read_mitgcm(level, data_dir=None, **kwargs):
             mitgcm = xr.open_mfdataset(file_dir)
 
     return mitgcm
+
+
+def read_and_merge_multiple_mitgcm(year_months):
+    """
+    Reads multiple layers of the MITgcm model tides_surface level data
+    from the default directory and merges them into a single dataset.
+
+    Renames the variables to match the OSCAR data.
+
+    Parameters
+    ----------
+    year_months : ``list`` of ``str``
+        List of year and month in the form YYYY_MM to be provided in kwargs.
+
+    data_dir : ``string``, optional
+        Directory containing the MITgcm data. If not provided, the default data directory will be used.
+
+    Returns
+    -------
+    ``xarray.Dataset``
+        The merged MITgcm data.
+
+    """
+    datasets = []
+    for year_month in year_months:
+        mitgcm = read_mitgcm(
+            level="tides_surface",
+            year_month=year_month,
+        )
+        datasets.append(mitgcm)
+
+    return xr.concat(datasets, dim="time")
 
 
 __load_data_dirs()
