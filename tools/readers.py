@@ -33,6 +33,7 @@ import numpy as np
 from warnings import warn
 from seastar.utils.readers import readNetCDFFile
 from seastar.utils import tools as ss_tools
+from oscarplus.processing.level2 import rotate_to_geo_coords
 
 __data_dirs = {}
 
@@ -563,17 +564,22 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                     "x": "GroundRange",
                     "XC": "longitude",
                     "YC": "latitude",
+                    "U": "CurrentX",
+                    "V": "CurrentY",
                 }
             )
 
             mitgcm = mitgcm.isel(z=z_layer)
 
+            mitgcm = rotate_to_geo_coords(
+                mitgcm, variable_root="Current", remove_old=True
+            )
+
             cvel, cdir = ss_tools.currentUV2VelDir(
-                mitgcm["U"].values, mitgcm["V"].values
+                mitgcm["CurrentU"].values, mitgcm["CurrentV"].values
             )  # converts u and v components to velocity and direction
             mitgcm["CurrentVelocity"] = (("time", "CrossRange", "GroundRange"), cvel)
             mitgcm["CurrentDirection"] = (("time", "CrossRange", "GroundRange"), cdir)
-            mitgcm = mitgcm.rename({"U": "CurrentU", "V": "CurrentV"})
 
         # Tides surface MITgcm data, requires year_month to be provided in kwargs
         # Generated using tidal_analysis.py functions, and stored in tides_surface
@@ -599,7 +605,6 @@ def read_mitgcm(level, data_dir=None, **kwargs):
                     )
                 file_dir = os.path.join(data_dir, filename)
 
-            print(file_dir)
             mitgcm = xr.open_mfdataset(file_dir)
 
     return mitgcm

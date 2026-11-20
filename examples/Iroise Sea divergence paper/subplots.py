@@ -233,8 +233,8 @@ def contours(
         **kwargs,
     )
     # Manually set the axis limits to match the extent
-    ax.set_xlim(extent[0], extent[1])  # Set x-axis limits
-    ax.set_ylim(extent[2], extent[3])  # Set y-axis limits
+    # ax.set_xlim(extent[0], extent[1])  # Set x-axis limits
+    # ax.set_ylim(extent[2], extent[3])  # Set y-axis limits
 
     # Apply contour labels
     legend_handles = []

@@ -51,7 +51,7 @@ def get_tidal_frequencies():
     }
 
 
-def fit_tidal_constituents(values, latitude, time):
+def fit_tidal_constituents(values, latitude, time, constituents="limited"):
     """
     Fit tidal constituents to the given values using the UTide package.
     Parameters
@@ -62,6 +62,11 @@ def fit_tidal_constituents(values, latitude, time):
         Latitude of the location in degrees.
     time : ``array-like``
         Time array in datetime64 format.
+    constituents : ``str``, optional
+        The set of tidal constituents to fit. Options are:
+        - "minimal": only M2 and S2
+        - "limited": M2, S2, N2, K2, K1
+        - "full": M2, S2, N2, K2, K1, O1, MU2, NU2, MF, L2, SSA
     Returns
     -------
     ``tuple``
@@ -77,11 +82,32 @@ def fit_tidal_constituents(values, latitude, time):
     if not np.isfinite(latitude) or valid.sum() < 3:
         return np.nan, np.nan, np.nan, np.nan
 
+    if constituents == "minimal":
+        constituents = ["M2", "S2"]
+    elif constituents == "limited":
+        constituents = ["M2", "S2", "N2", "K2", "K1", "O1"]
+    elif (
+        constituents == "full"
+    ):  # these are all constituents that have >2.5cm amplitude at -4.16,47.09
+        constituents = [
+            "M2",
+            "S2",
+            "N2",
+            "K2",
+            "K1",
+            "O1",
+            "MU2",
+            "NU2",
+            "MF",
+            "L2",
+            "SSA",
+        ]
+
     coef = solve(
         time[valid],
         values[valid],
         lat=latitude,
-        constit=["M2", "S2", "N2", "K1", "O1"],
+        constit=constituents,
         method="ols",
         conf_int="linear",
         trend=False,
@@ -144,6 +170,9 @@ def calculate_cycle_phase(latitude, phi, time, coef, name):
     latitude = float(latitude)
     phi = float(phi)
     time = np.asarray(time)
+    print(
+        f"Calculating cycle phase for {name} at latitude {latitude} and time {time[0]}"
+    )
 
     if not np.isfinite(latitude) or not np.isfinite(phi):
         return np.full(time.shape, np.nan, dtype=float)
@@ -174,7 +203,7 @@ def calculate_cycle_phase(latitude, phi, time, coef, name):
     return (V_M2 - phi) % 360.0
 
 
-def tidal_cycle_phases(ds, print_progress=True):
+def tidal_cycle_phases(ds, print_progress=True, skip_phase_calculation=False):
     """
     Calculate the tidal cycle phases and add to the dataset.
     Parameters
@@ -190,15 +219,19 @@ def tidal_cycle_phases(ds, print_progress=True):
     if print_progress:
         print("Calculating M2 and S2")
 
+    ds["Eta"] = ds["Eta"].chunk({"time": -1, "CrossRange": 10, "GroundRange": 10})
+
     coef = xr.apply_ufunc(
         fit_tidal_constituents,
         ds["Eta"],
         ds["latitude"],
         ds["time"],
+        "limited",
         input_core_dims=[
             ["time"],
             [],
             ["time"],
+            [],
         ],
         output_core_dims=[
             [],
@@ -209,6 +242,9 @@ def tidal_cycle_phases(ds, print_progress=True):
             object,
         ],
     )
+
+    if skip_phase_calculation:
+        return coef
 
     ds["M2_amplitude"], ds["M2_phase"], ds["S2_amplitude"], ds["S2_phase"] = (
         xr.apply_ufunc(
@@ -225,12 +261,12 @@ def tidal_cycle_phases(ds, print_progress=True):
             ],
             vectorize=True,
             dask="parallelized",
-            output_dtypes=[float, float, float, float],
+            output_dtypes=[np.float32, np.float32, np.float32, np.float32],
         )
     )
 
     if print_progress:
-        print("Calculating cycle phase")
+        print("Calculating M2 cycle phase")
 
     M2_cycle_phase = xr.apply_ufunc(
         calculate_cycle_phase,
@@ -256,6 +292,8 @@ def tidal_cycle_phases(ds, print_progress=True):
             "allow_rechunk": True,
         },
     )
+    if print_progress:
+        print("Calculating S2 cycle phase")
     S2_cycle_phase = xr.apply_ufunc(
         calculate_cycle_phase,
         ds["latitude"],
