@@ -25,8 +25,10 @@ Functions
 
 import numpy as np
 import xarray as xr
+import dask
 from utide import solve
 from utide.harmonics import ut_E
+from dask.diagnostics import ProgressBar
 
 F_M2 = 0.0805114
 OMEGA_M2 = 2 * np.pi * F_M2
@@ -109,7 +111,7 @@ def fit_tidal_constituents(values, latitude, time, constituents="limited"):
         lat=latitude,
         constit=constituents,
         method="ols",
-        conf_int="linear",
+        conf_int="none",
         trend=False,
         nodal=True,
         phase="Greenwich",
@@ -203,7 +205,9 @@ def calculate_cycle_phase(latitude, phi, time, coef, name):
     return (V_M2 - phi) % 360.0
 
 
-def tidal_cycle_phases(ds, print_progress=True, skip_phase_calculation=False):
+def tidal_cycle_phases(
+    ds, print_progress=True, skip_phase_calculation=False, constituents="limited"
+):
     """
     Calculate the tidal cycle phases and add to the dataset.
     Parameters
@@ -219,14 +223,14 @@ def tidal_cycle_phases(ds, print_progress=True, skip_phase_calculation=False):
     if print_progress:
         print("Calculating M2 and S2")
 
-    ds["Eta"] = ds["Eta"].chunk({"time": -1, "CrossRange": 10, "GroundRange": 10})
+    ds["Eta"] = ds["Eta"].chunk({"time": -1, "CrossRange": 5, "GroundRange": 5})
 
     coef = xr.apply_ufunc(
         fit_tidal_constituents,
         ds["Eta"],
         ds["latitude"],
         ds["time"],
-        "limited",
+        constituents,
         input_core_dims=[
             ["time"],
             [],
@@ -244,6 +248,8 @@ def tidal_cycle_phases(ds, print_progress=True, skip_phase_calculation=False):
     )
 
     if skip_phase_calculation:
+        with ProgressBar():
+            coef = dask.compute(coef, scheduler="threads", num_workers=8)
         return coef
 
     ds["M2_amplitude"], ds["M2_phase"], ds["S2_amplitude"], ds["S2_phase"] = (
