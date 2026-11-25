@@ -27,8 +27,10 @@ Functions
     rotate the components of the dataset to align with the track
 - find_closest_lon_lat :
     find the closest longitude and latitude in the dataset to the given lon and lat
-- fit_to_extent :
-    fit the dataset to the given extent
+- cut_to_extent :
+    cut the dataset to the given extent, not to be used for non-rectangular tracks
+- cut_to_extent_exactly :
+    cut the dataset to the given extent exactly, using masking
 """
 
 import os
@@ -714,7 +716,8 @@ def cut_to_extent(DS, extent):
     """
     Cut the dataset to the given extent.
     WARNING: Measures the distance quadratically, not suitable for large distances.
-    WARNING: Based on 2 points, may not be accurate for non-rectangular tracks.
+    WARNING: Based on 2 points, not accurate for non-rectangular tracks.
+    Use cut_to_extent_exactly for more accurate results.
     Parameters
     ----------
     DS : ``xarray.DataSet``
@@ -737,5 +740,38 @@ def cut_to_extent(DS, extent):
     DS_out = DS.isel(
         GroundRange=slice(min_GroundRange, max_GroundRange),
         CrossRange=slice(min_CrossRange, max_CrossRange),
+    )
+    return DS_out
+
+
+def cut_to_extent_exactly(DS, extent):
+    """
+    Cut the dataset to the given extent exactly, using masking.
+    Slower than cut_to_extent, but more accurate.
+    Parameters
+    ----------
+    DS : ``xarray.DataSet``
+        Dataset to cut to the extent.
+        Must contain the following variables:
+            - longitude
+            - latitude
+    extent : ``list``
+        List of the extent in the form:
+        [min_longitude, max_longitude, min_latitude, max_latitude].
+    Returns
+    -------
+    ``xarray.DataSet``
+        Dataset fitted to the extent.
+    """
+    longitude = ((DS.longitude + 180) % 360) - 180
+    mask = (
+        (longitude >= extent[0])
+        & (longitude <= extent[1])
+        & (DS.latitude >= extent[2])
+        & (DS.latitude <= extent[3])
+    )
+    DS_out = DS.where(
+        mask,
+        drop=True,
     )
     return DS_out
